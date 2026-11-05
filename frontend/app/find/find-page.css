@@ -1,0 +1,197 @@
+/*
+ * 상담기관 찾기 화면 스타일.
+ * find-page.jsx / directory-map.jsx 에서 불러와요.
+ * 색·간격은 app/globals.css 의 토큰(--primary, --border, --border 등)을 그대로 써요.
+ */
+@reference "../globals.css";
+
+/* ── 페이지 ───────────────────────── */
+.dir-page {
+  @apply space-y-8;
+}
+.dir-page .page-heading {
+  margin-bottom: 2rem;
+}
+.dir-filters {
+  @apply space-y-4;
+}
+.dir-layout {
+  @apply grid gap-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,3fr)] lg:items-start;
+}
+.dir-aside {
+  @apply order-first lg:sticky lg:top-8 lg:order-none;
+}
+
+/* ── 검색줄: 검색창과 지역 선택을 같은 높이로 ─────── */
+.dir-searchrow {
+  @apply grid items-center gap-3 sm:grid-cols-[1fr_11rem];
+}
+.dir-search-icon {
+  @apply pl-3;
+}
+.dir-search {
+  @apply h-11 rounded-ds-sm bg-surface-tint;
+}
+.dir-field {
+  @apply grid gap-1.5 type-ui-sm text-muted-foreground;
+}
+.dir-select {
+  @apply h-11 w-full min-w-0 rounded-ds-sm border border-input bg-surface-tint px-3 type-ui text-foreground outline-none transition;
+}
+.dir-select:focus-visible {
+  @apply border-ring ring-3 ring-ring/30;
+}
+
+/* ── 유형 칩 / 상세 조건 ───────────────── */
+.dir-chips {
+  @apply flex flex-wrap items-center gap-2;
+}
+.dir-chip {
+  @apply rounded-ds-sm border border-border bg-card px-4 py-2.5 type-ui-sm text-foreground transition-colors;
+}
+.dir-chip:hover {
+  @apply bg-surface-tint;
+}
+.dir-chip[aria-pressed="true"] {
+  @apply border-[1.5px] border-brand bg-brand-soft text-foreground;
+}
+.dir-chip:focus-visible,
+.dir-more:focus-visible,
+.dir-reset:focus-visible,
+.dir-link:focus-visible,
+.dir-footer a:focus-visible,
+.dir-empty button:focus-visible {
+  @apply outline-none ring-2 ring-ring;
+}
+.dir-more {
+  @apply ml-auto inline-flex items-center gap-1 rounded-ds-pill px-3 py-2 type-ui-sm text-primary;
+}
+.dir-more:hover {
+  @apply bg-muted;
+}
+.dir-more-icon {
+  @apply size-4 transition-transform;
+}
+.dir-more[aria-expanded="true"] .dir-more-icon {
+  @apply rotate-180;
+}
+.dir-advanced {
+  @apply grid gap-3 rounded-ds-sm bg-surface-tint p-4 sm:grid-cols-3;
+}
+
+/* ── 결과 목록 ───────────────────── */
+.dir-resultbar {
+  @apply flex items-baseline justify-between gap-4;
+}
+.dir-count {
+  @apply type-h2;
+}
+.dir-reset {
+  @apply rounded-ds-sm px-2 py-1 type-ui-sm text-muted-foreground underline-offset-4;
+}
+.dir-reset:hover {
+  @apply text-primary underline;
+}
+.dir-list {
+  @apply mt-4 grid gap-4;
+}
+.dir-card {
+  @apply rounded-ds-md border border-border bg-card p-5;
+}
+.dir-card-meta {
+  @apply flex flex-wrap items-center gap-x-2 gap-y-1 type-ui-sm;
+}
+.dir-tag {
+  @apply rounded-ds-sm bg-surface-tint px-2.5 py-1 font-semibold text-ink-secondary;
+}
+.dir-tag[data-tone="warm"] {
+  @apply bg-warm-soft text-warm-foreground;
+}
+.dir-location {
+  @apply text-muted-foreground;
+}
+.dir-card-title {
+  @apply mt-3 type-h2 text-foreground;
+}
+.dir-card-summary {
+  @apply mt-1.5 type-body text-ink-secondary;
+}
+.dir-services {
+  @apply mt-3 flex flex-wrap gap-1.5;
+}
+.dir-service {
+  @apply rounded-ds-pill border border-border px-2.5 py-1 type-ui-sm text-ink-secondary;
+}
+.dir-facts {
+  @apply mt-4 grid gap-4 border-t border-border pt-4 type-ui sm:grid-cols-3;
+}
+.dir-facts dt {
+  @apply type-ui-sm text-muted-foreground;
+}
+.dir-facts dd {
+  @apply mt-1 type-body;
+}
+.dir-audience {
+  @apply mt-3 type-legal text-muted-foreground;
+}
+.dir-link {
+  @apply mt-4 inline-flex min-h-10 items-center gap-1.5 rounded-ds-xl border border-primary/30 px-5 type-ui text-primary transition-colors;
+}
+.dir-link:hover {
+  @apply bg-muted;
+}
+.dir-link svg,
+.dir-footer a svg {
+  @apply size-4;
+}
+.dir-notice {
+  @apply mt-4 type-legal text-muted-foreground;
+}
+
+/* ── 결과 없음 ───────────────────── */
+.dir-empty {
+  @apply flex min-h-56 flex-col items-center justify-center px-6 text-center;
+}
+.dir-empty h3 {
+  @apply type-h2;
+}
+.dir-empty p {
+  @apply mt-1 text-sm text-muted-foreground;
+}
+.dir-empty button {
+  @apply mt-4 rounded-ds-xl bg-primary px-5 py-2.5 type-ui text-primary-foreground;
+}
+
+/* ── 하단 안내 ───────────────────── */
+.dir-footer {
+  @apply flex flex-col gap-3 border-t border-border pt-6 sm:flex-row sm:items-center sm:justify-between;
+}
+.dir-footer p {
+  @apply type-body text-ink-secondary;
+}
+.dir-footer strong {
+  @apply font-semibold text-foreground;
+}
+.dir-footer a {
+  @apply inline-flex items-center gap-1 type-ui text-primary underline underline-offset-4;
+}
+
+/* ── 지도 자리 ───────────────────── */
+.dir-map {
+  @apply relative isolate overflow-hidden rounded-ds-md border border-dashed border-border bg-surface-tint;
+}
+.dir-map--sized {
+  @apply h-56 lg:h-[calc(100vh-8rem)] lg:min-h-[24rem];
+}
+.dir-map-canvas {
+  @apply absolute inset-0;
+}
+.dir-map-note {
+  @apply pointer-events-none absolute inset-0 z-10 flex items-center justify-center p-6 text-center;
+}
+.dir-map-note p {
+  @apply max-w-[14rem] type-body text-ink-secondary;
+}
+.dir-map-note strong {
+  @apply block font-semibold text-foreground;
+}

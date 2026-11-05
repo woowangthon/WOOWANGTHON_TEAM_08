@@ -1,16 +1,24 @@
-# React + Vite
+# 마음결
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+청년 마음건강 첫걸음 서비스 (Next.js 16 + AI SDK).
 
-Currently, two official plugins are available:
+## 실행 방법
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+1. Node.js 20 이상 설치
+2. 이 `frontend` 폴더를 VS Code로 엽니다.
+3. 터미널에서 패키지 설치:
+   ```
+   npm install
+   ```
+4. `.env.example`을 복사해 `.env.local`을 만들고 `GOOGLE_GENERATIVE_AI_API_KEY`를 채웁니다.
+   (Google AI Studio에서 발급한 Gemini API 키)
+   (키가 없어도 화면은 열리지만 채팅·요약 기능은 동작하지 않습니다.)
+5. 개발 서버 실행:
+   ```
+   npm run dev
+   ```
+6. 브라우저에서 http://localhost:3000 을 엽니다.
 
-## React Compiler
+## 페이지
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- `/` 홈 · `/chat` 마음 정리 · `/summary` 상담 메모 · `/find` 상담기관 찾기 · `/support` 지원제도 탐색 · `/login` 로그인 · `/signup` 회원가입 (로그인·가입은 화면만 있고 Supabase 연결은 TODO)
