@@ -5,22 +5,56 @@ import { PageHeading } from "@/components/page-heading"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import "./login-page.css"
+import { useRouter } from "next/navigation"
+import { createClient } from "@/lib/supabase/client"
 
 // 로그인 화면
 export function LoginPage() {
+  const router = useRouter()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [message, setMessage] = useState("")
+  const [loading, setLoading] = useState(false)
 
-  function submitForm(event) {
+
+  async function submitForm(event) {
     event.preventDefault()
     setMessage("")
-    // TODO(백엔드 연결): 여기서 Supabase Auth 를 호출해요.
-    //   supabase.auth.signInWithPassword({ email, password })
-    // 성공하면 받은 JWT 를 Spring Boot 요청에 실어 보내고(router.push("/chat") 등으로 이동),
-    // 실패하면 setMessage(...) 로 안내해요.
-    setMessage("아직 로그인 서버와 연결되지 않았어요.")
+    setLoading(true)
+
+    try {
+      const supabase = createClient()
+
+      const { data, error } =
+          await supabase.auth.signInWithPassword({
+            email,
+            password,
+          })
+
+      if (error) {
+        console.error("로그인 실패:", error.message)
+        setMessage("이메일 또는 비밀번호를 확인해 주세요.")
+        return
+      }
+
+      if (!data.session) {
+        setMessage("로그인 세션을 확인하지 못했어요.")
+        return
+      }
+
+      // 로그인 성공 후 메인 페이지 이동
+      router.push("/")
+      router.refresh()
+
+    } catch (error) {
+      console.error("로그인 오류:", error)
+      setMessage("로그인 중 문제가 발생했어요.")
+
+    } finally {
+      setLoading(false)
+    }
   }
+
 
   return (
     <div className="login-page">
@@ -67,8 +101,13 @@ export function LoginPage() {
             </p>
           )}
 
-          <Button type="submit" size="lg" className="login-submit">
-            로그인
+          <Button
+              type="submit"
+              size="lg"
+              className="login-submit"
+              disabled={loading}
+          >
+            {loading ? "로그인 중..." : "로그인"}
           </Button>
 
           <p className="login-switch">
