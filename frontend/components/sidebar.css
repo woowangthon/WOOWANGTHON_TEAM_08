@@ -43,6 +43,12 @@
 .sidebar-foot .nav-link {
   @apply -mx-3 mb-3;
 }
+/* 로그아웃은 <button>이라 링크처럼 폭과 정렬을 맞춰줘요 */
+.sidebar-foot button.nav-link {
+  width: calc(100% + 1.5rem);
+  cursor: pointer;
+  text-align: left;
+}
 .sidebar-disclaimer {
   @apply type-legal text-muted-foreground;
 }

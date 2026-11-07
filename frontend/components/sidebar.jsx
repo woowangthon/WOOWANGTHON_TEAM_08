@@ -1,8 +1,10 @@
 "use client"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { Compass, FileText, Home, LogIn, MapPin, MessageCircle } from "lucide-react"
+import { usePathname, useRouter } from "next/navigation"
+import { Compass, FileText, Home, LogIn, LogOut, MapPin, MessageCircle } from "lucide-react"
 import { BrandLogo } from "@/components/brand-logo"
+import { useAuth } from "@/components/auth-provider"
+import { createClient } from "@/lib/supabase/client"
 import "./sidebar.css"
 const navigation = [
   { href: "/", label: "마음 홈", icon: Home },
@@ -31,9 +33,35 @@ function NavigationLinks({ mobile = false }) {
     </nav>
   )
 }
-// 로그인 링크: 넓은 화면은 사이드바 아래, 모바일은 위쪽 바 오른쪽에 둬요.
+// 로그인 링크: 로그인 전에는 "로그인", 로그인 후에는 "로그아웃"으로 바뀌어요.
+// 넓은 화면은 사이드바 아래, 모바일은 위쪽 바 오른쪽에 둬요.
 function LoginLink({ className }) {
   const pathname = usePathname()
+  const router = useRouter()
+  const { user, loading } = useAuth()
+
+  // 로그인 여부를 확인하는 동안은 깜빡이지 않게 비워둬요.
+  if (loading) return null
+
+  if (user) {
+    async function logout() {
+      await createClient().auth.signOut()
+      router.push("/")
+      router.refresh()
+    }
+    return (
+      <button
+        type="button"
+        onClick={logout}
+        title={user.email}
+        className={className}
+      >
+        <LogOut aria-hidden="true" className="nav-icon" />
+        <span>로그아웃</span>
+      </button>
+    )
+  }
+
   return (
     <Link
       href="/login"
