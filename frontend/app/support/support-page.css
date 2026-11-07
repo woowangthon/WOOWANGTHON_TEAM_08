@@ -20,6 +20,21 @@
 .support-chip[aria-pressed="true"] {
   @apply border-[1.5px] border-brand bg-brand-soft text-foreground;
 }
+.support-filters {
+  @apply mt-4 flex flex-wrap items-end gap-3;
+}
+.support-filters label {
+  @apply flex flex-col gap-1 type-ui-sm;
+}
+.support-filters select {
+  @apply min-h-10 max-w-full rounded-ds-sm border border-border bg-card px-3 text-foreground disabled:opacity-50;
+}
+.support-filters .support-available-filter {
+  @apply min-h-10 cursor-pointer flex-row items-center gap-2;
+}
+.support-available-filter input {
+  @apply size-4 accent-primary;
+}
 
 /* ── 제도 카드 ───────────────────── */
 .support-count {
@@ -30,6 +45,9 @@
 }
 .support-card {
   @apply rounded-ds-md border border-border bg-card p-5;
+}
+.support-tags {
+  @apply flex flex-wrap gap-2;
 }
 .support-tag {
   @apply inline-block rounded-ds-sm bg-warm-soft px-2.5 py-1 type-ui-sm text-warm-foreground;
@@ -47,7 +65,8 @@
   @apply type-ui-sm text-muted-foreground;
 }
 .support-facts dd {
-  @apply mt-1 type-body;
+  @apply mt-1 whitespace-pre-line type-body;
+  overflow-wrap: anywhere;
 }
 .support-fact-wide {
   @apply sm:col-span-2;
