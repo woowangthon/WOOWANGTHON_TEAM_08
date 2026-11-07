@@ -1,5 +1,5 @@
 "use client"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import { PageHeading } from "@/components/page-heading"
 import { Button } from "@/components/ui/button"
@@ -7,10 +7,17 @@ import { Input } from "@/components/ui/input"
 import "./login-page.css"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
+import { useAuth } from "@/components/auth-provider"
 
 // 로그인 화면
 export function LoginPage() {
   const router = useRouter()
+  const { user, loading: authLoading } = useAuth()
+
+  // 이미 로그인한 사람은 이 화면 대신 메인으로 보내요.
+  useEffect(() => {
+    if (!authLoading && user) router.replace("/")
+  }, [authLoading, user, router])
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [message, setMessage] = useState("")

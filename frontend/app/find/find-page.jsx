@@ -1,6 +1,6 @@
 "use client"
 import { useMemo, useState } from "react"
-import { ArrowUpRight, ChevronDown, Search } from "lucide-react"
+import { ArrowUpRight, ChevronDown, MapPin, Search } from "lucide-react"
 import { DirectoryMap } from "./directory-map"
 import { PageHeading } from "@/components/page-heading"
 import "./find-page.css"
@@ -104,6 +104,7 @@ export function FindPage() {
   const [booking, setBooking] = useState("전체")
   const [query, setQuery] = useState("")
   const [showMore, setShowMore] = useState(false)
+  const [selectedId, setSelectedId] = useState(null)
   const filteredResources = useMemo(() => {
     const normalizedQuery = query.trim().toLocaleLowerCase("ko-KR")
     return resources.filter((resource) => {
@@ -250,7 +251,11 @@ export function FindPage() {
           ) : (
             <ul className="dir-list">
               {filteredResources.map((resource) => (
-                <li key={resource.id} className="dir-card">
+                <li
+                  key={resource.id}
+                  className="dir-card"
+                  data-selected={selectedId === resource.id || undefined}
+                >
                   <div className="dir-card-meta">
                     <span
                       className="dir-tag"
@@ -288,6 +293,16 @@ export function FindPage() {
                     </div>
                   </dl>
                   <p className="dir-audience">이용 대상: {resource.audience}</p>
+                  {Number.isFinite(resource.lat) && Number.isFinite(resource.lng) && (
+                    <button
+                      type="button"
+                      onClick={() => setSelectedId(resource.id)}
+                      className="dir-mapbtn"
+                    >
+                      <MapPin aria-hidden="true" />
+                      지도에서 보기
+                    </button>
+                  )}
                   <a
                     href={resource.href}
                     target="_blank"
@@ -307,7 +322,12 @@ export function FindPage() {
         </section>
 
         <aside aria-label="상담기관 지도" className="dir-aside">
-          <DirectoryMap className="dir-map--sized" />
+          <DirectoryMap
+            className="dir-map--sized"
+            items={filteredResources}
+            selectedId={selectedId}
+            onSelect={setSelectedId}
+          />
         </aside>
       </div>
 

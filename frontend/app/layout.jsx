@@ -1,5 +1,6 @@
 import { Analytics } from "@vercel/analytics/next"
 import { Sidebar } from "@/components/sidebar"
+import { AuthProvider } from "@/components/auth-provider"
 import { ChatSessionProvider } from "@/components/chat-session-provider"
 import "./globals.css"
 export const metadata = {
@@ -29,9 +30,11 @@ export default function RootLayout({ children }) {
   return (
     <html lang="ko" className="light" suppressHydrationWarning>
       <body className="antialiased">
-        <ChatSessionProvider>
-          <Sidebar>{children}</Sidebar>
-        </ChatSessionProvider>
+        <AuthProvider>
+          <ChatSessionProvider>
+            <Sidebar>{children}</Sidebar>
+          </ChatSessionProvider>
+        </AuthProvider>
         {process.env.NODE_ENV === "production" && <Analytics />}
       </body>
     </html>
