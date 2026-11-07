@@ -184,14 +184,27 @@
   @apply h-56 lg:h-[calc(100vh-8rem)] lg:min-h-[24rem];
 }
 .dir-map-canvas {
-  @apply absolute inset-0;
+  /* 네이버 지도가 컨테이너에 position 을 직접 지정하므로, absolute 대신 크기를 명시해요 */
+  @apply h-full w-full;
 }
 .dir-map-note {
-  @apply pointer-events-none absolute inset-0 z-10 flex items-center justify-center p-6 text-center;
+  /* 지도 글씨와 안내 문구가 겹치지 않게 반투명 배경으로 덮어요 */
+  @apply pointer-events-none absolute inset-0 z-10 flex items-center justify-center bg-surface-tint/85 p-6 text-center backdrop-blur-[2px];
 }
 .dir-map-note p {
   @apply max-w-[14rem] type-body text-ink-secondary;
 }
 .dir-map-note strong {
   @apply block font-semibold text-foreground;
+}
+
+/* ── 지도 연동: 목록 ↔ 마커 ───── */
+.dir-card[data-selected] {
+  @apply border-primary;
+}
+.dir-mapbtn {
+  @apply mr-3 inline-flex items-center gap-1 type-ui text-foreground;
+}
+.dir-mapbtn svg {
+  @apply size-4;
 }
