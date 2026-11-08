@@ -208,3 +208,37 @@
 .dir-mapbtn svg {
   @apply size-4;
 }
+
+/* ── 내 위치 버튼 ───── */
+.dir-locate {
+  @apply absolute right-3 top-3 z-20 flex size-10 items-center justify-center rounded-ds-sm border border-border bg-card text-foreground shadow-sm transition-colors;
+}
+.dir-locate:hover:not(:disabled) {
+  @apply bg-primary-tint;
+}
+.dir-locate:disabled {
+  @apply cursor-wait opacity-70;
+}
+.dir-locate svg {
+  @apply size-5;
+}
+.dir-locate svg[data-busy] {
+  @apply animate-pulse;
+}
+.dir-locate-msg {
+  @apply absolute left-3 right-16 top-3 z-20 rounded-ds-sm border border-border bg-card px-3 py-2 type-ui text-ink-secondary shadow-sm;
+}
+.dir-map-privacy {
+  @apply mt-2 type-legal text-muted-foreground;
+}
+/* 지도 위 "내 위치" 파란 점 (네이버 지도 HTML 마커 안에서 쓰여요) */
+.dir-me-dot {
+  display: block;
+  width: 18px;
+  height: 18px;
+  box-sizing: border-box;
+  border: 3px solid #fff;
+  border-radius: 9999px;
+  background: #2f6fed;
+  box-shadow: 0 0 0 4px rgb(47 111 237 / 0.25);
+}

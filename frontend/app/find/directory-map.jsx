@@ -1,5 +1,6 @@
 "use client"
 import { useEffect, useRef, useState } from "react"
+import { Crosshair } from "lucide-react"
 import "./find-page.css"
 
 /**
@@ -8,6 +9,7 @@ import "./find-page.css"
  * - 키: .env.local 의 NEXT_PUBLIC_NAVER_MAP_CLIENT_ID (네이버 클라우드 콘솔의 Maps 클라이언트 ID)
  * - items: 지도에 찍을 기관 목록. { id, title, lat, lng } 가 있는 항목만 마커로 표시해요.
  * - selectedId / onSelect: 목록에서 고른 기관과 마커를 서로 연결해요.
+ * - onLocate: "내 위치" 버튼으로 위치를 얻었을 때 { lat, lng } 를 알려줘요. 위치는 저장·전송하지 않아요.
  */
 const CLIENT_ID = process.env.NEXT_PUBLIC_NAVER_MAP_CLIENT_ID
 const SCRIPT_URL = "https://oapi.map.naver.com/openapi/v3/maps.js"
@@ -37,11 +39,14 @@ function loadNaverMaps() {
 
 const SEOUL_CITY_HALL = { lat: 37.5665, lng: 126.978 }
 
-export function DirectoryMap({ className = "", items = [], selectedId = null, onSelect }) {
+export function DirectoryMap({ className = "", items = [], selectedId = null, onSelect, onLocate }) {
   const canvasRef = useRef(null)
   const mapRef = useRef(null)
   const markersRef = useRef(new Map())
   const onSelectRef = useRef(onSelect)
+  const userMarkerRef = useRef(null)
+  const [locating, setLocating] = useState(false)
+  const [locateMessage, setLocateMessage] = useState("")
   const [status, setStatus] = useState(CLIENT_ID ? "loading" : "nokey")
 
   useEffect(() => {
@@ -120,6 +125,61 @@ export function DirectoryMap({ className = "", items = [], selectedId = null, on
     }
   }, [selectedId, items, status])
 
+  // 4. "내 위치" 버튼: 누를 때만 브라우저가 위치 권한을 물어봐요.
+  function locateMe() {
+    const map = mapRef.current
+    if (!map || locating) return
+    if (!("geolocation" in navigator)) {
+      setLocateMessage("이 브라우저에서는 위치를 확인할 수 없어요.")
+      return
+    }
+    setLocating(true)
+    setLocateMessage("")
+    navigator.geolocation.getCurrentPosition(
+      ({ coords }) => {
+        const maps = window.naver.maps
+        const position = new maps.LatLng(coords.latitude, coords.longitude)
+        if (userMarkerRef.current) {
+          userMarkerRef.current.setPosition(position)
+        } else {
+          userMarkerRef.current = new maps.Marker({
+            map,
+            position,
+            title: "내 위치",
+            zIndex: 200,
+            icon: {
+              content: '<span class="dir-me-dot" aria-hidden="true"></span>',
+              size: new maps.Size(18, 18),
+              anchor: new maps.Point(9, 9),
+            },
+          })
+        }
+        map.setCenter(position)
+        map.setZoom(15)
+        onLocate?.({ lat: coords.latitude, lng: coords.longitude })
+        setLocating(false)
+      },
+      (error) => {
+        setLocateMessage(
+          error.code === 1
+            ? "위치 권한이 꺼져 있어요. 브라우저 설정에서 허용하면 내 주변을 볼 수 있어요."
+            : error.code === 3
+              ? "위치를 확인하는 데 시간이 걸리고 있어요. 잠시 뒤 다시 눌러 주세요."
+              : "내 위치를 확인하지 못했어요. 잠시 뒤 다시 시도해 주세요.",
+        )
+        setLocating(false)
+      },
+      { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 },
+    )
+  }
+
+  // 안내 문구는 몇 초 뒤에 사라져요.
+  useEffect(() => {
+    if (!locateMessage) return
+    const timer = setTimeout(() => setLocateMessage(""), 6000)
+    return () => clearTimeout(timer)
+  }, [locateMessage])
+
   const hasLocation = items.some((item) => Number.isFinite(item.lat) && Number.isFinite(item.lng))
   const note = {
     nokey: ["지도 키가 아직 없어요", "NEXT_PUBLIC_NAVER_MAP_CLIENT_ID 를 .env.local 에 넣어 주세요."],
@@ -132,6 +192,23 @@ export function DirectoryMap({ className = "", items = [], selectedId = null, on
   return (
     <div className={`dir-map ${className}`}>
       <div ref={canvasRef} id="directory-map" className="dir-map-canvas" />
+      {status === "ready" && (
+        <button
+          type="button"
+          onClick={locateMe}
+          disabled={locating}
+          aria-label="내 위치로 이동"
+          title="내 위치로 이동"
+          className="dir-locate focus-ring"
+        >
+          <Crosshair aria-hidden="true" data-busy={locating || undefined} />
+        </button>
+      )}
+      {locateMessage && (
+        <p role="status" className="dir-locate-msg">
+          {locateMessage}
+        </p>
+      )}
       {note && (
         <div className="dir-map-note">
           <p>
