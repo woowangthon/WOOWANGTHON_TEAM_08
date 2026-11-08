@@ -328,6 +328,7 @@ export function FindPage() {
             selectedId={selectedId}
             onSelect={setSelectedId}
           />
+          <p className="dir-map-privacy">내 위치는 지도 이동에만 쓰고, 저장하거나 서버로 보내지 않아요.</p>
         </aside>
       </div>
 

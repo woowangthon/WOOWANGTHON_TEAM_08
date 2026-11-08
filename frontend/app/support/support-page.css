@@ -23,14 +23,24 @@
 .support-filters {
   @apply mt-4 flex flex-wrap items-end gap-3;
 }
+/* 검색창·드롭다운 모양은 상담기관 찾기(find) 화면과 같게 맞춰요 */
+.support-search {
+  @apply h-11 rounded-ds-sm bg-surface-tint;
+}
+.support-search-icon {
+  @apply pl-3;
+}
 .support-filters label {
-  @apply flex flex-col gap-1 type-ui-sm;
+  @apply grid gap-1.5 type-ui-sm text-muted-foreground;
 }
 .support-filters select {
-  @apply min-h-10 max-w-full rounded-ds-sm border border-border bg-card px-3 text-foreground disabled:opacity-50;
+  @apply h-11 min-w-44 max-w-full rounded-ds-sm border border-input bg-surface-tint px-3 type-ui text-foreground outline-none transition disabled:opacity-50;
+}
+.support-filters select:focus-visible {
+  @apply border-ring ring-3 ring-ring/30;
 }
 .support-filters .support-available-filter {
-  @apply min-h-10 cursor-pointer flex-row items-center gap-2;
+  @apply min-h-11 cursor-pointer grid-flow-col items-center gap-2 text-foreground;
 }
 .support-available-filter input {
   @apply size-4 accent-primary;
