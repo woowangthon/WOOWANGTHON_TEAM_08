@@ -146,8 +146,8 @@ export function SupportPage() {
               </button>
             ))}
           </div>
-          <InputGroup className="mt-4">
-            <InputGroupAddon align="inline-start">
+          <InputGroup className="support-search mt-4">
+            <InputGroupAddon align="inline-start" className="support-search-icon">
               <Search aria-hidden="true" />
             </InputGroupAddon>
             <InputGroupInput
@@ -161,7 +161,7 @@ export function SupportPage() {
           <div className="support-filters" role="group" aria-label="거주 지역 및 접수 상태 필터">
             <label>
               시·도
-              <select className="focus-ring" value={province} onChange={(event) => {
+              <select value={province} onChange={(event) => {
                 setProvince(event.target.value)
                 setDistrict("")
               }}>
@@ -171,7 +171,7 @@ export function SupportPage() {
             </label>
             <label>
               시·군·구
-              <select className="focus-ring" value={district} disabled={!districts.length} onChange={(event) => setDistrict(event.target.value)}>
+              <select value={district} disabled={!districts.length} onChange={(event) => setDistrict(event.target.value)}>
                 <option value="">전체 시·군·구</option>
                 {districts.map((name) => <option key={name}>{name}</option>)}
               </select>
