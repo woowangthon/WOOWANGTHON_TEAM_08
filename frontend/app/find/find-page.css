@@ -16,17 +16,44 @@
   @apply space-y-4;
 }
 .dir-layout {
-  @apply grid gap-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,3fr)] lg:items-start;
+  /* 좁은 화면: 지도를 위에 고정(sticky)하고 목록만 아래에서 스크롤돼요. 넓은 화면: 목록 | 지도 두 칸 */
+  --dir-map-h: clamp(10rem, 30vh, 16rem);
+  --dir-stick-top: 3.5rem; /* 모바일 위쪽 바(h-14) 아래 */
+  @apply flex flex-col gap-4 lg:grid lg:grid-cols-[minmax(0,5fr)_minmax(0,3fr)] lg:items-start lg:gap-8;
+}
+@media (min-width: 48rem) {
+  .dir-layout {
+    --dir-stick-top: 0.75rem; /* 태블릿 폭: 위쪽 바가 없어요 */
+  }
 }
 .dir-aside {
-  @apply order-first lg:sticky lg:top-8 lg:order-none;
+  @apply sticky z-10 order-first bg-card pb-2 pt-1 lg:order-none lg:pb-0 lg:pt-0;
+  top: var(--dir-stick-top);
 }
-/* 모바일에서는 목록/지도 중 하나만 보여줘요 */
-.dir-layout[data-view="list"] .dir-aside {
-  @apply max-lg:hidden;
+/* 모바일: 부모의 좌우 여백까지 덮어서, 목록이 지도 옆으로 비쳐 보이지 않게 해요 */
+@media (max-width: 47.99rem) {
+  .dir-aside {
+    @apply -mx-4 px-4;
+  }
 }
-.dir-layout[data-view="map"] .dir-results {
-  @apply max-lg:hidden;
+@media (min-width: 48rem) and (max-width: 63.99rem) {
+  .dir-aside {
+    @apply -mx-8 px-8;
+  }
+}
+@media (min-width: 64rem) {
+  .dir-aside {
+    top: 2rem;
+  }
+}
+/* 카드를 맨 위로 올려 스크롤할 때 고정된 지도 밑에 가려지지 않게 */
+.dir-card {
+  scroll-margin-top: calc(var(--dir-stick-top) + var(--dir-map-h) + 3.5rem);
+}
+@media (min-width: 64rem) {
+  .dir-card {
+    scroll-margin-top: 1rem;
+  }
 }
 
 /* ── 검색줄: 검색창과 지역 선택을 같은 높이로 ─────── */
@@ -133,7 +160,8 @@
   @apply relative isolate overflow-hidden rounded-ds-md border border-dashed border-border bg-surface-tint;
 }
 .dir-map--sized {
-  @apply h-56 lg:h-[calc(100vh-8rem)] lg:min-h-[24rem];
+  height: var(--dir-map-h);
+  @apply lg:h-[calc(100vh-8rem)] lg:min-h-[24rem];
 }
 .dir-map-canvas {
   /* 네이버 지도가 컨테이너에 position 을 직접 지정하므로, absolute 대신 크기를 명시해요 */
@@ -235,7 +263,9 @@
 .dir-tab:focus-visible,
 .dir-toggle:focus-visible,
 .dir-reset:focus-visible,
-.dir-loadmore:focus-visible,
+.dir-loadmore:focus-visible {
+  @apply outline-none ring-2 ring-ring;
+}
 
 /* ── 결과 도구줄 ───── */
 .dir-tools {
@@ -293,17 +323,6 @@
 .dir-skel--title { @apply h-6 w-2/3; }
 .dir-skel--line { @apply h-4 w-full; }
 .dir-skel--short { @apply h-4 w-1/3; }
-
-/* ── 모바일 목록/지도 전환 ───── */
-.dir-viewswitch {
-  @apply grid grid-cols-2 gap-1 rounded-ds-sm bg-muted p-1 lg:hidden;
-}
-.dir-viewswitch button {
-  @apply min-h-10 rounded-ds-sm type-ui text-ink-secondary;
-}
-.dir-viewswitch button[aria-pressed="true"] {
-  @apply bg-card font-semibold text-foreground shadow-sm;
-}
 
 /* ── 핀 / 범례 / 클러스터 (지도 HTML 마커와 카드에서 같이 써요) ───── */
 .dir-pin {
@@ -385,18 +404,11 @@
 .dir-legend li {
   @apply inline-flex items-center gap-1.5;
 }
-.dir-selected-bar {
-  @apply mt-3 flex items-center justify-between gap-3 rounded-ds-sm bg-surface-tint p-3 type-ui lg:hidden;
+
+/* 위치 안내 문구: 넓은 화면은 지도 아래, 좁은 화면은 목록 맨 아래에 한 번만 보여요 */
+.dir-map-privacy--list {
+  @apply lg:hidden;
 }
-.dir-selected-bar p {
-  @apply grid min-w-0;
-}
-.dir-selected-bar strong {
-  @apply truncate font-semibold text-foreground;
-}
-.dir-selected-bar span {
-  @apply truncate type-ui-sm text-muted-foreground;
-}
-.dir-selected-bar button {
-  @apply shrink-0 rounded-ds-sm px-2 py-1 text-primary underline underline-offset-4;
+.dir-map-privacy--aside {
+  @apply max-lg:hidden;
 }

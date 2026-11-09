@@ -72,7 +72,6 @@ export function FindPage() {
   const [viewportOnly, setViewportOnly] = useState(false)
   const [viewportIds, setViewportIds] = useState(null)
   const [visibleCount, setVisibleCount] = useState(PAGE_STEP)
-  const [mobileView, setMobileView] = useState("list")
 
   // ── 데이터 불러오기 (Supabase facilities 테이블) ──
   const loadFacilities = useCallback(async () => {
@@ -202,7 +201,6 @@ export function FindPage() {
   }
 
   const hasFilters = tab !== "all" || query.trim() || activeProvince || viewportOnly
-  const selectedItem = activeSelectedId ? filtered.find((item) => item.id === activeSelectedId) : null
 
   return (
     <div className="dir-page">
@@ -270,16 +268,7 @@ export function FindPage() {
         </div>
       </section>
 
-      <div className="dir-viewswitch" role="group" aria-label="보기 방식">
-        <button type="button" aria-pressed={mobileView === "list"} onClick={() => setMobileView("list")}>
-          목록
-        </button>
-        <button type="button" aria-pressed={mobileView === "map"} onClick={() => setMobileView("map")}>
-          지도
-        </button>
-      </div>
-
-      <div className="dir-layout" data-view={mobileView}>
+      <div className="dir-layout">
         <section aria-labelledby="results-heading" className="dir-results">
           <div className="dir-resultbar">
             <h2 id="results-heading" className="dir-count" aria-live="polite">
@@ -364,10 +353,7 @@ export function FindPage() {
                           <button
                             type="button"
                             aria-pressed={isSelected}
-                            onClick={() => {
-                              toggleSelected(item.id)
-                              if (!isSelected) setMobileView("map")
-                            }}
+                            onClick={() => toggleSelected(item.id)}
                             className="dir-card-select"
                           >
                             {item.name}
@@ -409,6 +395,7 @@ export function FindPage() {
           <p className="dir-notice">
             운영 시간·예약 가능 여부는 바뀔 수 있어요. 가기 전에 기관에 직접 확인해 주세요.
           </p>
+          <p className="dir-map-privacy dir-map-privacy--list">내 위치는 지도 이동에만 쓰고, 저장하거나 서버로 보내지 않아요.</p>
         </section>
 
         <aside aria-label="상담기관 지도" className="dir-aside">
@@ -432,18 +419,7 @@ export function FindPage() {
               </li>
             ))}
           </ul>
-          {selectedItem && (
-            <div className="dir-selected-bar">
-              <p>
-                <strong>{selectedItem.name}</strong>
-                <span>{selectedItem.address}</span>
-              </p>
-              <button type="button" onClick={() => setMobileView("list")}>
-                목록에서 보기
-              </button>
-            </div>
-          )}
-          <p className="dir-map-privacy">내 위치는 지도 이동에만 쓰고, 저장하거나 서버로 보내지 않아요.</p>
+          <p className="dir-map-privacy dir-map-privacy--aside">내 위치는 지도 이동에만 쓰고, 저장하거나 서버로 보내지 않아요.</p>
         </aside>
       </div>
     </div>
