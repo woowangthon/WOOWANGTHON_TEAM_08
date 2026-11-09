@@ -11,6 +11,7 @@ import {
 } from "lucide-react"
 import { ActionLink } from "@/components/action-link"
 import { BrandMark } from "@/components/brand-logo"
+import { ChatHistory } from "@/components/chat-history"
 import { chatFocusOptions, useChatSession } from "@/components/chat-session-provider"
 import { PageHeading } from "@/components/page-heading"
 import {
@@ -47,14 +48,19 @@ function MessageBubble({ role, text }) {
   )
 }
 export function ChatPage() {
-  const { messages, sendMessage, status, error, stop, clearError, focus, setFocus, resetSession } =
-    useChatSession()
-  const [draft, setDraft] = useState("")
+  const {
+    messages, sendMessage, status, error, stop, clearError, focus, setFocus, resetSession,
+    userId, activeId, sessionVersion, historyLoading, historyBusy, historyNotice, saveSession,
+  } = useChatSession()
+  const [draftState, setDraftState] = useState({ version: sessionVersion, text: "" })
+  const draft = draftState.version === sessionVersion ? draftState.text : ""
+  const setDraft = (text) => setDraftState({ version: sessionVersion, text })
   const isBusy = status === "submitted" || status === "streaming"
+  const composerDisabled = isBusy || historyBusy
   function submitMessage(event) {
     event?.preventDefault()
     const text = draft.trim()
-    if (!text || isBusy) return
+    if (!text || composerDisabled) return
     if (status === "error") clearError()
     setDraft("")
     void sendMessage({ text }, { body: { focus } })
@@ -98,6 +104,7 @@ export function ChatPage() {
 
       <div className="chat-layout">
         <section aria-label="마음결 대화" className="chat-main">
+          <ChatHistory className="md:hidden" />
           <Card className="surface-card chat-card">
             <CardHeader className="chat-head">
               <div className="chat-head-row">
@@ -105,9 +112,17 @@ export function ChatPage() {
                   <CardTitle className="card-title-base">대화 방향을 골라주세요</CardTitle>
                 </div>
                 {visibleMessages.length > 0 && (
-                  <button type="button" onClick={resetSession} className="chat-reset focus-ring">
-                    새 대화
-                  </button>
+                  <div className="chat-record-actions">
+                    {userId && (
+                      <button type="button" onClick={() => void saveSession()} className="chat-reset focus-ring"
+                        disabled={composerDisabled || historyLoading}>
+                        {activeId ? "변경사항 저장" : "대화 저장"}
+                      </button>
+                    )}
+                    <button type="button" onClick={resetSession} className="chat-reset focus-ring" disabled={historyBusy}>
+                      새 대화
+                    </button>
+                  </div>
                 )}
               </div>
               <div className="chat-focus-grid">
@@ -186,7 +201,7 @@ export function ChatPage() {
                     onChange={(event) => setDraft(event.target.value)}
                     onKeyDown={handleComposerKeyDown}
                     placeholder="떠오르는 대로 적어보세요"
-                    disabled={isBusy}
+                    disabled={composerDisabled}
                     className="chat-textarea"
                   />
                   <InputGroupAddon align="block-end" className="chat-composer-bar">
@@ -208,7 +223,7 @@ export function ChatPage() {
                         type="submit"
                         size="icon-sm"
                         aria-label="메시지 보내기"
-                        disabled={!draft.trim() || isBusy}
+                        disabled={!draft.trim() || composerDisabled}
                       >
                         <Send aria-hidden="true" />
                       </InputGroupButton>
@@ -227,8 +242,9 @@ export function ChatPage() {
             </CardFooter>
           </Card>
 
+          {historyNotice && <p className="chat-privacy" role="status">{historyNotice}</p>}
           <p className="chat-privacy">
-            대화는 서비스에 저장되지 않아요. 이름·연락처같은 민감한 정보는 적지 마세요. 지금 위험하다면{" "}
+            로그인 후 저장 버튼을 누르면 대화 내용이 계정에 저장돼요. 이름·연락처 같은 민감한 정보는 적지 마세요. 지금 위험하다면{" "}
             <a href="tel:109">109</a> · <a href="tel:112">112</a> · <a href="tel:119">119</a>
           </p>
         </section>

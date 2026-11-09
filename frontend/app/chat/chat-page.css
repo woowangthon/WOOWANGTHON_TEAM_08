@@ -27,6 +27,12 @@
 .chat-head-desc {
   @apply mt-1 text-xs leading-5;
 }
+.chat-record-actions {
+  @apply flex flex-wrap justify-end gap-1;
+}
+.chat-reset:disabled {
+  @apply opacity-50;
+}
 .chat-reset {
   @apply shrink-0 rounded-ds-pill px-3 py-2 type-ui-sm text-muted-foreground transition-colors;
 }

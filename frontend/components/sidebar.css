@@ -29,7 +29,7 @@
   @apply fixed inset-y-0 left-0 z-20 hidden w-[228px] md:block;
 }
 .sidebar-panel-inner {
-  @apply flex h-full flex-col px-3 py-4;
+  @apply flex h-full flex-col overflow-y-auto px-3 py-4;
 }
 .sidebar-brand {
   @apply w-fit rounded-ds-sm px-2;
@@ -51,6 +51,41 @@
 }
 .sidebar-disclaimer {
   @apply type-legal text-muted-foreground;
+}
+.chat-history {
+  @apply mt-4 border-t border-border px-2 pb-3 pt-3;
+}
+.chat-history-heading {
+  @apply flex items-center justify-between gap-2 type-ui-sm font-semibold;
+}
+.chat-history-heading span,
+.chat-history-empty {
+  @apply type-legal text-muted-foreground;
+}
+.chat-history-empty {
+  @apply mt-2;
+}
+.chat-history-list {
+  @apply mt-2 space-y-1;
+}
+.chat-history-item {
+  @apply flex items-center gap-1;
+}
+.chat-history-open,
+.chat-history-delete {
+  @apply min-h-9 rounded-ds-sm hover:bg-primary-tint/60 disabled:opacity-50;
+}
+.chat-history-open {
+  @apply min-w-0 flex-1 truncate px-2 text-left type-ui-sm;
+}
+.chat-history-open[aria-current] {
+  @apply bg-primary-tint;
+}
+.chat-history-delete {
+  @apply grid w-9 shrink-0 place-items-center text-muted-foreground;
+}
+.chat-history-delete svg {
+  @apply size-4;
 }
 
 /* ── 위쪽 바 / 아래쪽 메뉴 (모바일) ───── */

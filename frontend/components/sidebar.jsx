@@ -4,6 +4,7 @@ import { usePathname, useRouter } from "next/navigation"
 import { Compass, FileText, Home, LogIn, LogOut, MapPin, MessageCircle } from "lucide-react"
 import { BrandLogo } from "@/components/brand-logo"
 import { useAuth } from "@/components/auth-provider"
+import { ChatHistory } from "@/components/chat-history"
 import { createClient } from "@/lib/supabase/client"
 import "./sidebar.css"
 const navigation = [
@@ -84,6 +85,7 @@ export function Sidebar({ children }) {
           <div className="sidebar-nav-wrap">
             <NavigationLinks />
           </div>
+          <ChatHistory />
           <div className="sidebar-foot">
             <LoginLink className="nav-link focus-ring-offset" />
             <p className="sidebar-disclaimer">
