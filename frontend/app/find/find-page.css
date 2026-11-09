@@ -21,10 +21,17 @@
 .dir-aside {
   @apply order-first lg:sticky lg:top-8 lg:order-none;
 }
+/* 모바일에서는 목록/지도 중 하나만 보여줘요 */
+.dir-layout[data-view="list"] .dir-aside {
+  @apply max-lg:hidden;
+}
+.dir-layout[data-view="map"] .dir-results {
+  @apply max-lg:hidden;
+}
 
 /* ── 검색줄: 검색창과 지역 선택을 같은 높이로 ─────── */
 .dir-searchrow {
-  @apply grid items-center gap-3 sm:grid-cols-[1fr_11rem];
+  @apply grid items-center gap-3 sm:grid-cols-[1fr_10rem_10rem];
 }
 .dir-search-icon {
   @apply pl-3;
@@ -38,45 +45,11 @@
 .dir-select {
   @apply h-11 w-full min-w-0 rounded-ds-sm border border-input bg-surface-tint px-3 type-ui text-foreground outline-none transition;
 }
+.dir-select:disabled {
+  @apply cursor-not-allowed opacity-50;
+}
 .dir-select:focus-visible {
   @apply border-ring ring-3 ring-ring/30;
-}
-
-/* ── 유형 칩 / 상세 조건 ───────────────── */
-.dir-chips {
-  @apply flex flex-wrap items-center gap-2;
-}
-.dir-chip {
-  @apply rounded-ds-sm border border-border bg-card px-4 py-2.5 type-ui-sm text-foreground transition-colors;
-}
-.dir-chip:hover {
-  @apply bg-surface-tint;
-}
-.dir-chip[aria-pressed="true"] {
-  @apply border-[1.5px] border-brand bg-brand-soft text-foreground;
-}
-.dir-chip:focus-visible,
-.dir-more:focus-visible,
-.dir-reset:focus-visible,
-.dir-link:focus-visible,
-.dir-footer a:focus-visible,
-.dir-empty button:focus-visible {
-  @apply outline-none ring-2 ring-ring;
-}
-.dir-more {
-  @apply ml-auto inline-flex items-center gap-1 rounded-ds-pill px-3 py-2 type-ui-sm text-primary;
-}
-.dir-more:hover {
-  @apply bg-muted;
-}
-.dir-more-icon {
-  @apply size-4 transition-transform;
-}
-.dir-more[aria-expanded="true"] .dir-more-icon {
-  @apply rotate-180;
-}
-.dir-advanced {
-  @apply grid gap-3 rounded-ds-sm bg-surface-tint p-4 sm:grid-cols-3;
 }
 
 /* ── 결과 목록 ───────────────────── */
@@ -112,27 +85,6 @@
 }
 .dir-card-title {
   @apply mt-3 type-h2 text-foreground;
-}
-.dir-card-summary {
-  @apply mt-1.5 type-body text-ink-secondary;
-}
-.dir-services {
-  @apply mt-3 flex flex-wrap gap-1.5;
-}
-.dir-service {
-  @apply rounded-ds-pill border border-border px-2.5 py-1 type-ui-sm text-ink-secondary;
-}
-.dir-facts {
-  @apply mt-4 grid gap-4 border-t border-border pt-4 type-ui sm:grid-cols-3;
-}
-.dir-facts dt {
-  @apply type-ui-sm text-muted-foreground;
-}
-.dir-facts dd {
-  @apply mt-1 type-body;
-}
-.dir-audience {
-  @apply mt-3 type-legal text-muted-foreground;
 }
 .dir-link {
   @apply mt-4 inline-flex min-h-10 items-center gap-1.5 rounded-ds-xl border border-primary/30 px-5 type-ui text-primary transition-colors;
@@ -199,14 +151,34 @@
 }
 
 /* ── 지도 연동: 목록 ↔ 마커 ───── */
+/* 카드 전체를 눌러 지도에서 보기: 제목 버튼을 카드 전체로 늘려요 (안의 링크는 그대로 눌려요) */
+.dir-card {
+  @apply relative;
+}
+.dir-card[data-clickable] {
+  @apply cursor-pointer transition-colors hover:border-ring;
+}
+.dir-card-select {
+  @apply text-left;
+}
+.dir-card-select::after {
+  content: "";
+  @apply absolute inset-0 rounded-ds-md;
+}
+.dir-card-select:focus-visible {
+  @apply outline-none;
+}
+.dir-card-select:focus-visible::after {
+  @apply ring-2 ring-ring;
+}
+.dir-card-actions {
+  @apply pointer-events-none relative z-10;
+}
+.dir-card-actions a {
+  @apply pointer-events-auto;
+}
 .dir-card[data-selected] {
   @apply border-primary;
-}
-.dir-mapbtn {
-  @apply mr-3 inline-flex items-center gap-1 type-ui text-foreground;
-}
-.dir-mapbtn svg {
-  @apply size-4;
 }
 
 /* ── 내 위치 버튼 ───── */
@@ -241,4 +213,190 @@
   border-radius: 9999px;
   background: #2f6fed;
   box-shadow: 0 0 0 4px rgb(47 111 237 / 0.25);
+}
+
+
+/* ── 유형 탭 (원래 칩 모양 그대로) ───── */
+.dir-tabs {
+  @apply flex flex-wrap items-center gap-2;
+}
+.dir-tab {
+  @apply inline-flex items-center gap-1.5 rounded-ds-sm border border-border bg-card px-4 py-2.5 type-ui-sm text-foreground transition-colors;
+}
+.dir-tab:hover {
+  @apply bg-surface-tint;
+}
+.dir-tab[aria-pressed="true"] {
+  @apply border-[1.5px] border-brand bg-brand-soft text-foreground;
+}
+.dir-tab-count {
+  @apply type-ui-sm text-muted-foreground;
+}
+.dir-tab:focus-visible,
+.dir-toggle:focus-visible,
+.dir-reset:focus-visible,
+.dir-loadmore:focus-visible,
+
+/* ── 결과 도구줄 ───── */
+.dir-tools {
+  @apply flex flex-wrap items-center justify-end gap-2;
+}
+.dir-toggle {
+  @apply rounded-ds-pill border border-border px-3 py-1.5 type-ui-sm text-ink-secondary transition-colors;
+}
+.dir-toggle:hover {
+  @apply bg-muted;
+}
+.dir-toggle[aria-pressed="true"] {
+  @apply border-brand bg-brand-soft text-foreground;
+}
+
+/* ── 카드 보조 ───── */
+.dir-card[data-hover] {
+  @apply border-ring;
+}
+.dir-card-address {
+  @apply mt-1.5 type-body text-ink-secondary;
+}
+.dir-card-phone {
+  @apply mt-1 type-ui text-ink-secondary;
+}
+.dir-card-actions {
+  @apply mt-4 flex flex-wrap items-center gap-x-4 gap-y-2;
+}
+.dir-card-actions .dir-link {
+  @apply mt-0 min-h-9 px-4;
+}
+
+/* ── 더 보기 ───── */
+.dir-more-row {
+  @apply mt-5 flex flex-col items-center gap-3;
+}
+.dir-range {
+  @apply type-ui-sm text-muted-foreground;
+}
+.dir-loadmore {
+  @apply min-h-10 rounded-ds-xl border border-primary/30 px-6 type-ui text-primary transition-colors;
+}
+.dir-loadmore:hover {
+  @apply bg-muted;
+}
+
+/* ── 불러오는 중 ───── */
+.dir-skeleton {
+  @apply space-y-3;
+}
+.dir-skel {
+  @apply block rounded-ds-sm bg-muted;
+}
+.dir-skel--tag { @apply h-5 w-24; }
+.dir-skel--title { @apply h-6 w-2/3; }
+.dir-skel--line { @apply h-4 w-full; }
+.dir-skel--short { @apply h-4 w-1/3; }
+
+/* ── 모바일 목록/지도 전환 ───── */
+.dir-viewswitch {
+  @apply grid grid-cols-2 gap-1 rounded-ds-sm bg-muted p-1 lg:hidden;
+}
+.dir-viewswitch button {
+  @apply min-h-10 rounded-ds-sm type-ui text-ink-secondary;
+}
+.dir-viewswitch button[aria-pressed="true"] {
+  @apply bg-card font-semibold text-foreground shadow-sm;
+}
+
+/* ── 핀 / 범례 / 클러스터 (지도 HTML 마커와 카드에서 같이 써요) ───── */
+.dir-pin {
+  display: block;
+  box-sizing: border-box;
+  width: 22px;
+  height: 22px;
+  border-radius: 9999px;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.35);
+  background: #2e625b;
+  transition: transform 0.12s ease;
+}
+.dir-pin[data-kind="public"] {
+  background: #131416;
+}
+.dir-pin[data-kind="private"] {
+  background: #fff;
+  border-color: #2e625b;
+}
+/* 병원: 초록 원 + 흰색 "+" (선 두 개를 겹쳐서 그려요) */
+.dir-pin[data-kind="hospital"] {
+  background-color: #2e625b;
+  background-image: linear-gradient(#fff, #fff), linear-gradient(#fff, #fff);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 10px 2.5px, 2.5px 10px;
+}
+.dir-pin[data-kind="hospital"][data-selected] {
+  background-size: 14px 3px, 3px 14px;
+}
+.dir-pin[data-kind="other"] {
+  background: #8a9096;
+}
+.dir-pin[data-selected] {
+  width: 30px;
+  height: 30px;
+  border-width: 3px;
+  box-shadow: 0 0 0 4px rgb(46 98 91 / 0.3), 0 2px 6px rgb(0 0 0 / 0.4);
+}
+.dir-pin--dot {
+  width: 12px;
+  height: 12px;
+  border-width: 1.5px;
+  box-shadow: none;
+  flex-shrink: 0;
+}
+/* 카드 위 작은 점은 "+" 없이 색만, 범례의 점은 "+"가 보이게 조금 크게 */
+.dir-card .dir-pin--dot[data-kind="hospital"] {
+  background-image: none;
+}
+.dir-legend .dir-pin--dot {
+  width: 18px;
+  height: 18px;
+  border-width: 2px;
+}
+.dir-legend .dir-pin--dot[data-kind="hospital"] {
+  background-size: 8px 2px, 2px 8px;
+}
+.dir-cluster {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 34px;
+  height: 34px;
+  padding: 0 6px;
+  box-sizing: border-box;
+  border: 2px solid #fff;
+  border-radius: 9999px;
+  background: #131416;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.35);
+}
+.dir-legend {
+  @apply mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 type-ui-sm text-ink-secondary;
+}
+.dir-legend li {
+  @apply inline-flex items-center gap-1.5;
+}
+.dir-selected-bar {
+  @apply mt-3 flex items-center justify-between gap-3 rounded-ds-sm bg-surface-tint p-3 type-ui lg:hidden;
+}
+.dir-selected-bar p {
+  @apply grid min-w-0;
+}
+.dir-selected-bar strong {
+  @apply truncate font-semibold text-foreground;
+}
+.dir-selected-bar span {
+  @apply truncate type-ui-sm text-muted-foreground;
+}
+.dir-selected-bar button {
+  @apply shrink-0 rounded-ds-sm px-2 py-1 text-primary underline underline-offset-4;
 }
