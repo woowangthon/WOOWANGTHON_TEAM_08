@@ -22,3 +22,13 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Next.js
+.next
+out
+.vercel
+.env
+.env*.local
+
+# 기관 원본 CSV (커밋 금지)
+facilities_rows*.csv
