@@ -220,8 +220,8 @@ export function SummaryPage() {
               </CardContent>
               <CardFooter className="summary-foot">
                 <p className="summary-note">
-                  버튼을 누르면 대화 내용이 AI 모델 제공자에게 전송되어 요약을 생성합니다. 대화
-                  기록은 서비스 데이터베이스에 저장하지 않아요.
+                  버튼을 누르면 대화 내용이 AI 모델 제공자에게 전송되어 요약을 생성합니다. 메모는
+                  별도로 저장되지 않으며, 로그인 후 저장한 대화는 서비스 데이터베이스에 보관됩니다.
                 </p>
               </CardFooter>
             </Card>
