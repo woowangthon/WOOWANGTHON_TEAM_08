@@ -145,7 +145,9 @@ function AccountChatSession({ children, userId }) {
       }
       setActiveId(data.id)
       setHistory((current) => [data, ...current.filter((record) => record.id !== data.id)])
-      setHistoryNotice("대화를 저장했어요.")
+      setHistoryNotice(messages.at(-1).role === "user"
+        ? "대화를 저장했어요. 마지막 메시지에는 저장할 챗봇 답변이 없어요."
+        : "대화를 저장했어요.")
     }, "대화를 저장하지 못했어요. 잠시 후 다시 시도해 주세요.")
   }
 

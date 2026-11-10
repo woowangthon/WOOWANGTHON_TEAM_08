@@ -59,11 +59,16 @@ export async function POST(request) {
       instructions: getChatInstructions(selectedFocus),
       messages: await convertToModelMessages(validation.data),
       maxOutputTokens: 420,
-      // The SDK otherwise logs the full provider error, including request details.
-      onError: () => {},
+      // Log only the provider status, since the full error can include request details.
+      onError({ error }) {
+        console.error("Chat generation failed", error?.lastError?.statusCode ?? error?.statusCode ?? "unknown")
+      },
     })
     return result.toUIMessageStreamResponse({
-      onError: () => "응답을 준비하지 못했어요. 잠시 후 다시 시도해 주세요.",
+      onError(error) {
+        const status = error?.lastError?.statusCode ?? error?.statusCode
+        return status === 429 || status === 503 ? "CHAT_PROVIDER_UNAVAILABLE" : "CHAT_GENERATION_FAILED"
+      },
     })
   } catch (error) {
     if (error instanceof LLMConfigurationError) {

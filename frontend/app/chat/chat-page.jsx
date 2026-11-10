@@ -233,7 +233,9 @@ export function ChatPage() {
               </form>
               {error && (
                 <div role="alert" className="chat-error">
-                  <span>응답을 완료하지 못했어요. 잠시 후 다시 시도해 주세요.</span>
+                  <span>{error.message === "CHAT_PROVIDER_UNAVAILABLE"
+                    ? "지금 챗봇이 답변을 생성하지 못했어요. 잠시 후 다시 시도해 주세요."
+                    : "응답을 완료하지 못했어요. 잠시 후 다시 시도해 주세요."}</span>
                   <button type="button" onClick={clearError}>
                     확인했어요
                   </button>
