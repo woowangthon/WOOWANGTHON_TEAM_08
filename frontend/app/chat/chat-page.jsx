@@ -131,7 +131,7 @@ export function ChatPage() {
       <PageHeading
         eyebrow="AI 마음정리 도우미"
         title="말로 꺼내면, 좀 정리돼요"
-        description="무슨 일이 있었는지, 어떤 기분인지, 상담에서 뭘 말하고 싶은지. 떠오르는 것부터 편하게 적어 주세요."
+        description="무슨 일이 있었는지부터 이야기해요. 대화에 따라 감정을 살펴보고 상담에서 전할 내용을 정리해요."
         action={
           visibleMessages.length > 0 ? (
             <ActionLink href="/summary" variant="outline">
@@ -149,7 +149,7 @@ export function ChatPage() {
             <CardHeader className="chat-head">
               <div className="chat-head-row">
                 <div className="chat-head-title">
-                  <CardTitle className="card-title-base">마음결이 답변을 만드는 과정</CardTitle>
+                  <CardTitle className="card-title-base">대화 진행 단계</CardTitle>
                 </div>
                 {visibleMessages.length > 0 && (
                   <div className="chat-record-actions">
@@ -159,28 +159,29 @@ export function ChatPage() {
                         {activeId ? "변경사항 저장" : "대화 저장"}
                       </button>
                     )}
-                    <button type="button" onClick={resetSession} className="chat-reset focus-ring" disabled={historyBusy}>
+                    <button type="button" onClick={resetSession} className="chat-reset focus-ring" disabled={composerDisabled}>
                       새 대화
                     </button>
                   </div>
                 )}
               </div>
-              <ol className="chat-stages" aria-label="마음결이 답변을 만드는 과정">
-                {processStages.map(({ id, Icon, label }, index) => (
-                  <li
-                    key={id}
-                    className="chat-stage"
-                    data-active={activeStage === index ? "true" : undefined}
-                    data-done={activeStage > index ? "true" : undefined}
-                  >
-                    <Icon aria-hidden="true" />
-                    <span className="chat-stage-label">{label}</span>
-                  </li>
-                ))}
+              <ol className="chat-focus-grid" aria-label="대화 진행 단계">
+                {chatFocusOptions.map((option) => {
+                  const Icon = focusIcons[option.id]
+                  return (
+                    <li
+                      key={option.id}
+                      aria-current={focus === option.id ? "step" : undefined}
+                      className="chat-focus"
+                    >
+                      <Icon aria-hidden="true" />
+                      <span className="chat-focus-text">
+                        <span className="chat-focus-label">{option.label}</span>
+                      </span>
+                    </li>
+                  )
+                })}
               </ol>
-              <p className="chat-stage-detail" aria-live="polite">
-                {activeStage >= 0 ? processStages[activeStage].detail : idleStageDetail}
-              </p>
             </CardHeader>
 
             <CardContent className="chat-body">

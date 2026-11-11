@@ -45,10 +45,16 @@
 .chat-stage {
   @apply flex min-h-12 items-center gap-2.5 rounded-ds-sm border border-border bg-card px-3 py-3 text-muted-foreground transition-[border-color,background-color,box-shadow,color] duration-300;
 }
-.chat-stage > svg {
-  @apply size-4 shrink-0;
+.chat-focus[aria-current="step"] {
+  @apply border-[1.5px] border-brand bg-brand-soft text-foreground;
 }
-.chat-stage-label {
+.chat-focus > svg {
+  @apply mt-0.5 size-4 shrink-0;
+}
+.chat-focus-text {
+  @apply min-w-0;
+}
+.chat-focus-label {
   @apply block type-ui-sm font-semibold;
 }
 .chat-stage[data-done="true"] {
