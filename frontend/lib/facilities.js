@@ -14,6 +14,7 @@ export const FACILITY_TABS = [
 
 // DB의 category_code(24종) → 탭. 목록에 없는 새 값은 "전체"에서만 보여요.
 // 2026-11 기준 3,214건: 공공 640 · 민간 398 · 병원 2,176
+// (아래 dropDuplicateDesignations로 "(마약류)" 중복 5건을 뺀 뒤에는 병원 2,171, 전체 3,209건)
 const CATEGORY_TAB = {
   // 공공 기관
   기초정신건강복지센터: "public",
@@ -125,6 +126,23 @@ function normalizeFacility(row) {
   }
 }
 
+// 같은 병원이 "○○병원"(정신병원)과 "○○병원(마약류)"(마약류중독자치료보호기관) 두 줄로 들어 있어요.
+// 이름과 전화번호가 같은 짝이 있을 때만 "(마약류)" 줄을 목록에서 빼요. (DB 원본은 그대로예요)
+const DESIGNATION_SUFFIX = "(마약류)"
+function dropDuplicateDesignations(rows) {
+  const baseKeys = new Set(
+    rows
+      .filter((row) => !(row.name ?? "").trim().endsWith(DESIGNATION_SUFFIX))
+      .map((row) => `${(row.name ?? "").trim()}|${(row.phone ?? "").trim()}`),
+  )
+  return rows.filter((row) => {
+    const name = (row.name ?? "").trim()
+    if (!name.endsWith(DESIGNATION_SUFFIX)) return true
+    const base = name.slice(0, -DESIGNATION_SUFFIX.length).trim()
+    return !baseKeys.has(`${base}|${(row.phone ?? "").trim()}`)
+  })
+}
+
 // ── Supabase에서 전부 가져오기 ───────────────────────
 const PAGE_SIZE = 1000 // Supabase는 한 번에 가져오는 행 수에 상한이 있을 수 있어서 나눠서 가져와요.
 const COLUMNS = "id,name,category_code,phone,address,homepage"
@@ -156,7 +174,7 @@ export async function fetchFacilities(supabase) {
     if (error?.code !== "42703") throw error
     rows = await fetchAllRows(supabase, COLUMNS)
   }
-  const facilities = rows.map(normalizeFacility)
+  const facilities = dropDuplicateDesignations(rows).map(normalizeFacility)
 
   const provinces = [...new Set(facilities.map((item) => item.province).filter(Boolean))].sort(
     (a, b) => {
@@ -198,6 +216,18 @@ export function formatDistance(km) {
 
 // ── 네이버 지도 링크 ────────────────────────────────
 // 네이버 지도에서 장소를 검색한 화면으로 열어요(그 화면에서 "길찾기"를 누를 수 있어요).
+// 검색어에서만 이름 앞의 "(복지)", "(사)" 같은 법인 표기를 떼고, 줄바꿈·겹공백과 주소 끝의 "-"를 정리해요.
+// (화면에 보이는 이름과 DB 값은 그대로예요)
+function searchName(name) {
+  return name
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/^[(（][^)）]{1,10}[)）]\s*/, "")
+}
+function searchAddress(address) {
+  return address.replace(/\s+/g, " ").replace(/\s*-\s*$/, "").trim()
+}
 export function naverMapLink(facility) {
-  return `https://map.naver.com/p/search/${encodeURIComponent(`${facility.name} ${facility.address}`)}`
+  const query = `${searchName(facility.name)} ${searchAddress(facility.address)}`
+  return `https://map.naver.com/p/search/${encodeURIComponent(query)}`
 }
