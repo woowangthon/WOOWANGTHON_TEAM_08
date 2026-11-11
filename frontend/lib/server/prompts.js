@@ -47,3 +47,10 @@ export function getChatInstructions(focus) {
     .filter(Boolean)
     .join("\n\n")
 }
+
+export const chatStageInstructions = {
+  situation: `사용자가 겪은 일이나 반복되는 상황이 하나라도 구체적으로 드러나면 feelings로 넘어가세요. 시작 시점, 원인, 일상에 미친 영향을 모두 확인할 필요는 없습니다. 이전 메시지에 이미 나온 상황도 근거로 삼으세요.
+예: "요즘 힘들어요"만 있으면 situation에 머물러 어떤 일이 있었는지 한 가지 묻습니다. "발표할 때마다 말이 막혀요"라고 하면 feelings로 넘어가 그때 어떤 마음이 드는지 묻습니다.`,
+  feelings: "사용자가 자신의 감정이나 몸의 반응을 표현해 상담에서 다룰 내용을 물을 수 있으면 consultation으로 넘어가세요. 이미 표현한 감정을 다시 묻지 않습니다.",
+  consultation: "상담 준비는 마지막 단계입니다. 이 단계에 머무르면서 상담에서 전하고 싶은 내용을 정리합니다.",
+}

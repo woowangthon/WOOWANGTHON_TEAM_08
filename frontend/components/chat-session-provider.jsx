@@ -4,6 +4,7 @@ import { DefaultChatTransport } from "ai"
 import { useRouter } from "next/navigation"
 import { createContext, useContext, useEffect, useRef, useState } from "react"
 import { useAuth } from "@/components/auth-provider"
+import { initialChatStage, nextChatStage, normalizeChatStage } from "@/lib/chat-stages"
 import { createClient } from "@/lib/supabase/client"
 export const chatFocusOptions = [
   {
@@ -68,7 +69,7 @@ export function ChatSessionProvider({ children }) {
 
 function AccountChatSession({ children, userId }) {
   const router = useRouter()
-  const [focus, setFocus] = useState("feelings")
+  const [focus, setFocus] = useState(initialChatStage)
   const [summary, setSummary] = useState(null)
   const [history, setHistory] = useState([])
   const [historyLoading, setHistoryLoading] = useState(Boolean(userId))
@@ -79,7 +80,15 @@ function AccountChatSession({ children, userId }) {
   const pending = useRef(false)
   const mounted = useRef(false)
   const draftId = useRef(null)
-  const chat = useChat({ transport })
+  const chat = useChat({
+    transport,
+    onFinish({ message, finishReason, isAbort, isDisconnect, isError }) {
+      if (isAbort || isDisconnect || isError || finishReason !== "stop") return
+      const stage = message.parts.find((part) => part.type === "data-chat-stage")?.data
+      if (!stage) return
+      setFocus((current) => stage.from === current && stage.to === nextChatStage(current) ? stage.to : current)
+    },
+  })
   const streaming = chat.status === "submitted" || chat.status === "streaming"
 
   useEffect(() => {
@@ -175,10 +184,10 @@ function AccountChatSession({ children, userId }) {
     }, "대화를 삭제하지 못했어요. 잠시 후 다시 시도해 주세요.")
   }
 
-  function replaceSession(messages = [], nextFocus = "feelings", id = null) {
+  function replaceSession(messages = [], nextFocus = initialChatStage, id = null) {
     chat.setMessages(messages)
     chat.clearError()
-    setFocus(nextFocus)
+    setFocus(normalizeChatStage(nextFocus))
     setSummary(null)
     setActiveId(id)
     setSessionVersion((version) => version + 1)
@@ -186,8 +195,7 @@ function AccountChatSession({ children, userId }) {
   }
 
   function resetSession() {
-    if (pending.current) return
-    if (streaming) void chat.stop()
+    if (pending.current || streaming) return
     replaceSession()
     setHistoryNotice("")
   }
@@ -202,7 +210,6 @@ function AccountChatSession({ children, userId }) {
         clearError: chat.clearError,
         setMessages: chat.setMessages,
         focus,
-        setFocus,
         summary,
         setSummary,
         resetSession,
