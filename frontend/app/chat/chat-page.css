@@ -45,10 +45,7 @@
 .chat-focus {
   @apply flex min-h-12 items-center gap-2.5 rounded-ds-sm border border-border bg-card px-3 py-3 text-left text-foreground transition-colors;
 }
-.chat-focus:hover {
-  @apply bg-surface-tint;
-}
-.chat-focus[aria-pressed="true"] {
+.chat-focus[aria-current="step"] {
   @apply border-[1.5px] border-brand bg-brand-soft text-foreground;
 }
 .chat-focus > svg {
