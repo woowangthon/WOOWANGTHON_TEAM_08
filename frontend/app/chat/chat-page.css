@@ -39,11 +39,11 @@
 .chat-reset:hover {
   @apply bg-muted text-foreground;
 }
-.chat-stages {
+.chat-focus-grid {
   @apply grid gap-2 sm:grid-cols-3;
 }
-.chat-stage {
-  @apply flex min-h-12 items-center gap-2.5 rounded-ds-sm border border-border bg-card px-3 py-3 text-muted-foreground transition-[border-color,background-color,box-shadow,color] duration-300;
+.chat-focus {
+  @apply flex min-h-12 items-center gap-2.5 rounded-ds-sm border border-border bg-card px-3 py-3 text-left text-foreground transition-colors;
 }
 .chat-focus[aria-current="step"] {
   @apply border-[1.5px] border-brand bg-brand-soft text-foreground;
@@ -57,31 +57,8 @@
 .chat-focus-label {
   @apply block type-ui-sm font-semibold;
 }
-.chat-stage[data-done="true"] {
-  @apply border-brand/40 text-foreground;
-}
-.chat-stage[data-active="true"] {
-  @apply border-[1.5px] border-brand bg-brand-soft text-foreground;
-  box-shadow:
-    0 0 0 4px color-mix(in srgb, var(--brand) 16%, transparent),
-    0 0 18px color-mix(in srgb, var(--brand) 32%, transparent);
-}
-.chat-stage[data-active="true"] > svg {
-  @apply text-brand;
-  animation: chat-stage-pulse 1.4s ease-in-out infinite;
-}
-.chat-stage-detail {
-  @apply -mt-1 min-h-10 type-legal text-muted-foreground;
-}
-@keyframes chat-stage-pulse {
-  50% {
-    opacity: 0.45;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .chat-stage[data-active="true"] > svg {
-    animation: none;
-  }
+.chat-focus-desc {
+  @apply mt-1 block type-legal text-muted-foreground;
 }
 
 /* ── 대화 카드: 대화 내용 ───────────── */
