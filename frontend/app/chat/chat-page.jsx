@@ -1,5 +1,5 @@
 "use client"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import Link from "next/link"
 import {
   ArrowRight,
@@ -12,7 +12,7 @@ import {
 import { ActionLink } from "@/components/action-link"
 import { BrandMark } from "@/components/brand-logo"
 import { ChatHistory } from "@/components/chat-history"
-import { useChatSession } from "@/components/chat-session-provider"
+import { chatFocusOptions, useChatSession } from "@/components/chat-session-provider"
 import { PageHeading } from "@/components/page-heading"
 import {
   Card,
@@ -30,46 +30,10 @@ import {
   InputGroupTextarea,
 } from "@/components/ui/input-group"
 import "./chat-page.css"
-// 답변을 만드는 동안 차례로 켜지는 표시용 단계입니다. 클릭해서 고르는 항목이 아닙니다.
-const processStages = [
-  {
-    id: "situation",
-    Icon: Search,
-    label: "상황부터 정리하기",
-    status: "말씀하신 상황을 읽고 있어요",
-    detail: "보낸 말에서 무슨 일이 있었는지부터 읽어요. 빠진 부분은 추측하지 않고 하나씩 되물어요.",
-  },
-  {
-    id: "feelings",
-    Icon: Heart,
-    label: "감정 살펴보기",
-    status: "마음에 가까운 표현을 찾고 있어요",
-    detail: "직접 표현한 감정과 몸의 신호를 바탕으로 해요. 감정 이름을 대신 붙이지 않고 부드럽게 물어봐요.",
-  },
-  {
-    id: "consultation",
-    Icon: ClipboardList,
-    label: "상담 준비하기",
-    status: "상담에 가져갈 내용을 정리하며 답변을 쓰고 있어요",
-    detail: "상담에서 나누고 싶은 이야기를 정리해요. 모인 내용은 '상담 메모'에서 볼 수 있어요.",
-  },
-]
-const idleStageDetail =
-  "메시지를 보내면 마음결이 답변을 만드는 동안 세 단계가 차례로 켜져요. 진단이나 치료 조언은 하지 않아요."
-const SLOW_WAIT_SECONDS = 8
-
-function useWaitSeconds(isBusy) {
-  const [seconds, setSeconds] = useState(0)
-  useEffect(() => {
-    if (!isBusy) return
-    const startedAt = Date.now()
-    const timer = setInterval(() => setSeconds(Math.floor((Date.now() - startedAt) / 1000)), 500)
-    return () => {
-      clearInterval(timer)
-      setSeconds(0)
-    }
-  }, [isBusy])
-  return seconds
+const focusIcons = {
+  situation: Search,
+  feelings: Heart,
+  consultation: ClipboardList,
 }
 function MessageBubble({ role, text }) {
   const isAssistant = role === "assistant"
@@ -93,10 +57,6 @@ export function ChatPage() {
   const setDraft = (text) => setDraftState({ version: sessionVersion, text })
   const isBusy = status === "submitted" || status === "streaming"
   const composerDisabled = isBusy || historyBusy
-  const waitSeconds = useWaitSeconds(isBusy)
-  // 응답이 흘러오기 시작하면 마지막 단계, 그 전에는 경과 시간에 따라 1→2단계로 표시합니다.
-  const activeStage = !isBusy ? -1 : status === "streaming" ? 2 : waitSeconds < 3 ? 0 : 1
-  const isSlow = isBusy && waitSeconds >= SLOW_WAIT_SECONDS
   function submitMessage(event) {
     event?.preventDefault()
     const text = draft.trim()
@@ -222,11 +182,7 @@ export function ChatPage() {
                 {isBusy && (
                   <div className="chat-typing" aria-label="답변을 준비하고 있어요">
                     <BrandMark className="chat-avatar" />
-                    <div className="chat-typing-bubble">
-                      {isSlow
-                        ? "평소보다 오래 걸리고 있어요. 오류가 아니니 조금만 기다려 주세요…"
-                        : `${processStages[Math.max(activeStage, 0)].status}…`}
-                    </div>
+                    <div className="chat-typing-bubble">생각하고 있어요…</div>
                   </div>
                 )}
               </div>
