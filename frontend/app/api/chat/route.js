@@ -67,7 +67,11 @@ export async function POST(request) {
 전환 조건이 처음 충족되었거나 사용자가 현재 단계를 건너뛰고 싶어 하면, 다음 단계로 넘어가도 괜찮은지 한 번만 묻고 replyStage는 ${focus}로 유지하세요. 전환을 제안하는 답변에서는 다음 단계의 질문을 함께 하지 마세요.
 사용자가 거절하거나 동의가 불분명하면 replyStage를 ${focus}로 유지하세요. 거절한 제안은 반복하지 마세요.`
           : `replyStage는 ${focus}로 유지하세요.`,
-        `replyStage는 이번 답변이 실제로 진행하는 단계입니다. 사용자가 더 이야기하고 싶지 않다고 하면 replyStage를 ${focus}로 유지하고 짧게 마무리하세요. 위기 상황에서는 전환을 제안하거나 진행하지 말고 replyStage를 ${focus}로 유지하며 안전 안내를 우선하세요. situation, feelings, consultation 같은 내부 단계 코드는 사용자에게 보여주지 마세요.`,
+        `replyStage는 이번 답변이 실제로 진행하는 단계입니다. situation, feelings, consultation 같은 내부 단계 코드는 사용자에게 보여주지 마세요.
+즉각적인 위험을 새로 밝힌 경우 replyStage를 ${focus}로 유지하고 긴급 도움 안내를 먼저 하세요.
+앞선 위험에 대해 사용자가 안전을 확보했다고 밝혔고 새 위험 신호가 없다면 현재 요청에 맞춰 답하세요. 이미 확인된 안전 여부를 다시 묻지 마세요.
+같은 대화에서 최근에 밝힌 즉각적인 위험이 해소됐는지 확인되지 않은 채 사용자가 화제만 바꿨다면 replyStage를 ${focus}로 유지하세요. 앞선 위험에 관한 현재 안전 확인 질문 한 가지로 답변을 시작하세요. 긴급 도움 안내가 필요하면 질문 뒤에 붙이세요. 두 위기 대응 경우에는 일반 탐색 질문이나 단계 전환을 제안하지 마세요.
+위기 상황이 아니고 사용자가 더 이야기하고 싶지 않다고 하면 replyStage를 ${focus}로 유지하고 짧게 마무리하세요.`,
       ].join("\n\n"),
       messages: modelMessages,
       abortSignal: request.signal,
