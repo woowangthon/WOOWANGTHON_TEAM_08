@@ -35,6 +35,11 @@ export async function POST(request) {
     if (!isRecord(body) || !Array.isArray(body.messages) || body.messages.length > 24) {
       return Response.json({ error: "대화 내용을 확인해 주세요." }, { status: 400 })
     }
+    const tone = body.tone ?? "warm"
+    if (tone !== "warm" && tone !== "structured") {
+      return Response.json({ error: "대화 말투를 확인해 주세요." }, { status: 400 })
+    }
+    const provider = tone === "warm" ? "1" : "2"
     const messages = normalizeMessages(body.messages)
     const latestMessage = messages.at(-1)
     const totalCharacters = messages.reduce(
@@ -58,9 +63,9 @@ export async function POST(request) {
     const allowedStages = nextFocus === focus ? [focus] : [focus, nextFocus]
     const modelMessages = await convertToModelMessages(validation.data)
     const result = streamText({
-      ...getModelConfig("chat"),
+      ...getModelConfig("chat", provider),
       instructions: [
-        getChatInstructions(focus),
+        getChatInstructions(focus, tone),
         chatStageInstructions[focus],
         nextFocus !== focus
           ? `현재 단계는 ${focus}입니다. 직전 챗봇 답변에서 다음 단계로 넘어가자고 제안했고 사용자가 이번 메시지에서 그 제안에 명확히 동의한 경우에만 replyStage를 ${nextFocus}로 정하세요. 이 경우 이번 답변부터 다음 단계 지침을 적용하고 같은 답변에서 또 다른 전환을 제안하지 마세요. 다음 단계 지침: ${chatFocusInstructions[nextFocus]}

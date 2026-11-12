@@ -132,6 +132,12 @@
 .chat-form {
   @apply w-full;
 }
+.chat-tone {
+  @apply mb-2 inline-flex max-w-full flex-wrap items-center gap-x-2 gap-y-1.5 type-ui-sm text-muted-foreground;
+}
+.chat-tone-select {
+  @apply h-11 max-w-full rounded-ds-sm border border-input bg-surface-tint px-3 type-ui text-foreground disabled:opacity-50;
+}
 .chat-composer {
   @apply h-auto min-h-28 flex-col items-stretch rounded-ds-sm bg-card p-1 shadow-[var(--shadow-warm)];
 }

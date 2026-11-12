@@ -53,6 +53,7 @@ export function ChatPage() {
     userId, activeId, sessionVersion, historyLoading, historyBusy, historyNotice, saveSession,
   } = useChatSession()
   const [draftState, setDraftState] = useState({ version: sessionVersion, text: "" })
+  const [tone, setTone] = useState("warm")
   const draft = draftState.version === sessionVersion ? draftState.text : ""
   const setDraft = (text) => setDraftState({ version: sessionVersion, text })
   const isBusy = status === "submitted" || status === "streaming"
@@ -63,7 +64,7 @@ export function ChatPage() {
     if (!text || composerDisabled) return
     if (status === "error") clearError()
     setDraft("")
-    void sendMessage({ text }, { body: { focus } })
+    void sendMessage({ text }, { body: { focus, tone } })
   }
   function handleComposerKeyDown(event) {
     if (
@@ -190,6 +191,18 @@ export function ChatPage() {
 
             <CardFooter className="chat-foot">
               <form onSubmit={submitMessage} className="chat-form">
+                <label className="chat-tone">
+                  <span>대화 말투</span>
+                  <select
+                    className="chat-tone-select focus-ring"
+                    value={tone}
+                    onChange={(event) => setTone(event.target.value)}
+                    disabled={composerDisabled}
+                  >
+                    <option value="warm">따뜻하게 들어주기</option>
+                    <option value="structured">차분하게 정리하기</option>
+                  </select>
+                </label>
                 <InputGroup className="chat-composer">
                   <InputGroupTextarea
                     aria-label="마음결에게 보낼 메시지"
