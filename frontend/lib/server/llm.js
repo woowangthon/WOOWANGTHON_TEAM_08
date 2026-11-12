@@ -11,10 +11,7 @@ export class LLMConfigurationError extends Error {
   }
 }
 
-// Read at request time so chat and summary always use the same server setting.
-export function getModelConfig(task) {
-  const provider = process.env.LLM_PROVIDER || "1"
-
+export function getModelConfig(task, provider = process.env.LLM_PROVIDER || "1") {
   if (provider === "1") {
     if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY?.trim()) {
       throw new LLMConfigurationError("GOOGLE_GENERATIVE_AI_API_KEY가 설정되지 않았습니다.")

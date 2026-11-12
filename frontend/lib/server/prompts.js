@@ -57,9 +57,10 @@ export const summaryFocusLabels = {
   consultation: "전문가 상담을 준비하기",
 }
 
-export function getChatInstructions(focus) {
+export function getChatInstructions(focus, tone = "warm") {
   return [
     baseChatInstructions,
+    chatToneInstructions[tone],
     `대화 방향: ${chatFocusInstructions[focus]}`,
     additionalChatInstructions.trim(),
   ]
