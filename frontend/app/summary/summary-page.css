@@ -95,3 +95,45 @@
 .summary-questions p {
   @apply rounded-ds-sm bg-surface-tint px-3.5 py-3;
 }
+
+/* ── 인쇄 / PDF로 저장 ──────────────────
+   "PDF로 저장" 버튼을 누르면 브라우저 인쇄 창이 열려요.
+   인쇄할 때만 메뉴·버튼·옆 안내를 숨기고 메모 카드만 남겨요. */
+@page {
+  margin: 16mm;
+}
+@media print {
+  .sidebar:has(.summary-page) .sidebar-panel,
+  .sidebar:has(.summary-page) .sidebar-topbar,
+  .sidebar:has(.summary-page) .sidebar-bottomnav,
+  .summary-page .page-heading,
+  .summary-aside,
+  .summary-head-actions,
+  .summary-status,
+  .summary-error {
+    display: none !important;
+  }
+  .sidebar:has(.summary-page) .sidebar-main {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    min-height: 0;
+    background: #fff;
+  }
+  .summary-layout {
+    display: block;
+  }
+  .summary-page .surface-card {
+    box-shadow: none !important;
+    border: 0;
+  }
+  .summary-section {
+    background: none;
+    border: 1px solid #d9dedc;
+    break-inside: avoid;
+  }
+  .summary-head {
+    break-after: avoid;
+  }
+}
