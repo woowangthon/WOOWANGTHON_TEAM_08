@@ -11,6 +11,11 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    // Guest chat remains available when Supabase Auth has not been configured.
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY) {
+      setLoading(false)
+      return
+    }
     const supabase = createClient()
 
     // 새로고침했을 때 저장돼 있는 세션을 읽어와요.

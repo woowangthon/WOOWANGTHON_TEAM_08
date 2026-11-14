@@ -1,24 +1,9 @@
-import { google } from "@ai-sdk/google"
-import { convertToModelMessages, safeValidateUIMessages, streamText } from "ai"
+import { convertToModelMessages, createUIMessageStream, createUIMessageStreamResponse, Output, safeValidateUIMessages, streamText } from "ai"
+import { z } from "zod"
+import { nextChatStage, normalizeChatStage } from "../../../lib/chat-stages.js"
+import { getModelConfig, LLMConfigurationError } from "../../../lib/server/llm.js"
+import { chatFocusInstructions, chatStageInstructions, getChatInstructions } from "../../../lib/server/prompts.js"
 export const maxDuration = 30
-const focusInstructions = {
-  situation:
-    "대화에서는 상황을 먼저 살펴봅니다. 무슨 일이 있었는지, 언제부터인지, 일상에 어떤 영향을 주는지 한 번에 하나씩 묻고 성급하게 원인을 추측하지 않습니다.",
-  feelings:
-    "대화에서는 사용자가 직접 표현한 감정과 몸의 신호를 살펴봅니다. 감정의 이름을 대신 붙이거나 강도를 추측하지 말고, 사용자의 표현을 바탕으로 부드럽게 질문합니다.",
-  consultation:
-    "대화에서는 전문가 상담을 준비하도록 돕습니다. 상담에서 다루고 싶은 주제, 최근 상황, 원하는 도움, 전문가에게 물어보고 싶은 내용을 정리하되 답변을 강요하지 않습니다.",
-}
-const baseInstructions = `당신은 한국 청년의 마음 정리와 전문가 상담 준비를 돕는 대화 도우미 '마음결'입니다.
-
-- 의료진이나 상담 전문가인 척하지 않습니다. 진단, 치료, 약 복용·중단 조언을 하지 않습니다.
-- 사용자의 말을 공감적이고 중립적으로 반영합니다. 판단, 낙인, 성급한 긍정, 확정적인 원인 추측을 피합니다.
-- 한국어로 짧고 자연스럽게 답하고, 한 번에 하나의 부담 없는 후속 질문만 합니다. 사용자가 답하고 싶지 않으면 건너뛰어도 된다고 알려줍니다.
-- 사용자의 말에서 확인된 내용만 정리합니다. 정보가 부족하면 단정하지 말고 먼저 확인합니다.
-- 자해·자살 생각이나 당장의 위험이 언급되면 다른 질문보다 안전을 우선합니다. 한국에서 즉각적인 위험이면 112 또는 119에 연락하고, 자살예방상담전화 109 또는 가까운 믿을 수 있는 사람에게 지금 바로 도움을 요청하도록 안내합니다. 혼자 있지 말고 안전한 곳으로 이동하도록 권합니다.
-- 위기 상황이 아닌 경우에도 전문적인 도움이 필요해 보이면 지역 정신건강복지센터나 적절한 전문가와 연결할 수 있다고 안내합니다.
-- 개인정보 보호를 과장하거나 '아무에게도 전달되지 않는다'고 약속하지 않습니다.
-- 목표는 정신건강 문제를 해결하는 것이 아니라, 사용자가 자신의 고민을 정리하고 실제 도움을 받기까지의 진입장벽을 낮추는 것입니다.`
 function isRecord(value) {
   return typeof value === "object" && value !== null && !Array.isArray(value)
 }
@@ -50,6 +35,11 @@ export async function POST(request) {
     if (!isRecord(body) || !Array.isArray(body.messages) || body.messages.length > 24) {
       return Response.json({ error: "대화 내용을 확인해 주세요." }, { status: 400 })
     }
+    const tone = body.tone ?? "warm"
+    if (tone !== "warm" && tone !== "structured") {
+      return Response.json({ error: "대화 말투를 확인해 주세요." }, { status: 400 })
+    }
+    const provider = tone === "warm" ? "1" : "2"
     const messages = normalizeMessages(body.messages)
     const latestMessage = messages.at(-1)
     const totalCharacters = messages.reduce(
@@ -68,18 +58,74 @@ export async function POST(request) {
     if (!validation.success) {
       return Response.json({ error: "대화 내용을 확인해 주세요." }, { status: 400 })
     }
-    const focus = body.focus
-    const selectedFocus =
-      focus === "situation" || focus === "consultation" || focus === "feelings" ? focus : "feelings"
+    const focus = normalizeChatStage(body.focus)
+    const nextFocus = nextChatStage(focus)
+    const allowedStages = nextFocus === focus ? [focus] : [focus, nextFocus]
+    const modelMessages = await convertToModelMessages(validation.data)
     const result = streamText({
-      model: google("gemini-3.8-flash"),
-      instructions: `${baseInstructions}\n\n대화 방향: ${focusInstructions[selectedFocus]}`,
-      messages: await convertToModelMessages(validation.data),
-      temperature: 0.35,
+      ...getModelConfig("chat", provider),
+      instructions: [
+        getChatInstructions(focus, tone),
+        chatStageInstructions[focus],
+        nextFocus !== focus
+          ? `현재 단계는 ${focus}입니다. 직전 챗봇 답변에서 다음 단계로 넘어가자고 제안했고 사용자가 이번 메시지에서 그 제안에 명확히 동의한 경우에만 replyStage를 ${nextFocus}로 정하세요. 이 경우 이번 답변부터 다음 단계 지침을 적용하고 같은 답변에서 또 다른 전환을 제안하지 마세요. 다음 단계 지침: ${chatFocusInstructions[nextFocus]}
+전환 조건이 처음 충족되었거나 사용자가 현재 단계를 건너뛰고 싶어 하면, 다음 단계로 넘어가도 괜찮은지 한 번만 묻고 replyStage는 ${focus}로 유지하세요. 전환을 제안하는 답변에서는 다음 단계의 질문을 함께 하지 마세요.
+사용자가 거절하거나 동의가 불분명하면 replyStage를 ${focus}로 유지하세요. 거절한 제안은 반복하지 마세요.`
+          : `replyStage는 ${focus}로 유지하세요.`,
+        `replyStage는 이번 답변이 실제로 진행하는 단계입니다. situation, feelings, consultation 같은 내부 단계 코드는 사용자에게 보여주지 마세요.
+즉각적인 위험을 새로 밝힌 경우 replyStage를 ${focus}로 유지하고 긴급 도움 안내를 먼저 하세요.
+앞선 위험에 대해 사용자가 안전을 확보했다고 밝혔고 새 위험 신호가 없다면 현재 요청에 맞춰 답하세요. 이미 확인된 안전 여부를 다시 묻지 마세요.
+같은 대화에서 최근에 밝힌 즉각적인 위험이 해소됐는지 확인되지 않은 채 사용자가 화제만 바꿨다면 replyStage를 ${focus}로 유지하세요. 앞선 위험에 관한 현재 안전 확인 질문 한 가지로 답변을 시작하세요. 긴급 도움 안내가 필요하면 질문 뒤에 붙이세요. 두 위기 대응 경우에는 일반 탐색 질문이나 단계 전환을 제안하지 마세요.
+위기 상황이 아니고 사용자가 더 이야기하고 싶지 않다고 하면 replyStage를 ${focus}로 유지하고 짧게 마무리하세요.`,
+      ].join("\n\n"),
+      messages: modelMessages,
+      abortSignal: request.signal,
+      output: Output.object({
+        schema: z.object({ replyStage: z.enum(allowedStages), reply: z.string() }),
+      }),
       maxOutputTokens: 420,
+      // Log only the provider status, since the full error can include request details.
+      onError({ error }) {
+        console.error("Chat generation failed", error?.lastError?.statusCode ?? error?.statusCode ?? "unknown")
+      },
     })
-    return result.toUIMessageStreamResponse()
-  } catch {
+    const stream = createUIMessageStream({
+      async execute({ writer }) {
+        const id = "reply"
+        let displayed = ""
+        writer.write({ type: "start" })
+        writer.write({ type: "text-start", id })
+        for await (const partial of result.partialOutputStream) {
+          const reply = partial.reply
+          if (reply?.startsWith(displayed) && reply.length > displayed.length) {
+            writer.write({ type: "text-delta", id, delta: reply.slice(displayed.length) })
+            displayed = reply
+          }
+        }
+        const finishReason = await result.finishReason
+        const { reply, replyStage } = await result.output
+        if (finishReason !== "stop" || !reply.trim() || !reply.startsWith(displayed)) {
+          throw new Error("Incomplete chat reply")
+        }
+        if (reply.length > displayed.length) {
+          writer.write({ type: "text-delta", id, delta: reply.slice(displayed.length) })
+        }
+        writer.write({ type: "text-end", id })
+        if (replyStage !== focus) {
+          writer.write({ type: "data-chat-stage", data: { from: focus, to: replyStage } })
+        }
+        writer.write({ type: "finish", finishReason })
+      },
+      onError(error) {
+        const status = error?.lastError?.statusCode ?? error?.statusCode
+        return status === 429 || status === 503 ? "CHAT_PROVIDER_UNAVAILABLE" : "CHAT_GENERATION_FAILED"
+      },
+    })
+    return createUIMessageStreamResponse({ stream })
+  } catch (error) {
+    if (error instanceof LLMConfigurationError) {
+      return Response.json({ error: error.message }, { status: 500 })
+    }
     return Response.json(
       { error: "응답을 준비하지 못했어요. 잠시 후 다시 시도해 주세요." },
       { status: 500 },

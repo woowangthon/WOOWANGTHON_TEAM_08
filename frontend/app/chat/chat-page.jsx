@@ -1,19 +1,13 @@
 "use client"
 import { useState } from "react"
 import Link from "next/link"
-import {
-  ArrowRight,
-  ClipboardList,
-  Heart,
-  MessageCircle,
-  Search,
-  Send,
-} from "lucide-react"
+import { ArrowRight, MessageCircle, Send } from "lucide-react"
 import { ActionLink } from "@/components/action-link"
 import { BrandMark } from "@/components/brand-logo"
 import { ChatHistory } from "@/components/chat-history"
 import { chatFocusOptions, useChatSession } from "@/components/chat-session-provider"
 import { PageHeading } from "@/components/page-heading"
+import { ToneMenu } from "@/components/tone-menu"
 import {
   Card,
   CardContent,
@@ -30,11 +24,6 @@ import {
   InputGroupTextarea,
 } from "@/components/ui/input-group"
 import "./chat-page.css"
-const focusIcons = {
-  situation: Search,
-  feelings: Heart,
-  consultation: ClipboardList,
-}
 function MessageBubble({ role, text }) {
   const isAssistant = role === "assistant"
   return (
@@ -49,10 +38,11 @@ function MessageBubble({ role, text }) {
 }
 export function ChatPage() {
   const {
-    messages, sendMessage, status, error, stop, clearError, focus, setFocus, resetSession,
+    messages, sendMessage, status, error, stop, clearError, focus, resetSession,
     userId, activeId, sessionVersion, historyLoading, historyBusy, historyNotice, saveSession,
   } = useChatSession()
   const [draftState, setDraftState] = useState({ version: sessionVersion, text: "" })
+  const [tone, setTone] = useState("warm")
   const draft = draftState.version === sessionVersion ? draftState.text : ""
   const setDraft = (text) => setDraftState({ version: sessionVersion, text })
   const isBusy = status === "submitted" || status === "streaming"
@@ -63,7 +53,7 @@ export function ChatPage() {
     if (!text || composerDisabled) return
     if (status === "error") clearError()
     setDraft("")
-    void sendMessage({ text }, { body: { focus } })
+    void sendMessage({ text }, { body: { focus, tone } })
   }
   function handleComposerKeyDown(event) {
     if (
@@ -91,7 +81,7 @@ export function ChatPage() {
       <PageHeading
         eyebrow="AI 마음정리 도우미"
         title="말로 꺼내면, 좀 정리돼요"
-        description="무슨 일이 있었는지, 어떤 기분인지, 상담에서 뭘 말하고 싶은지. 편한 쪽을 골라 시작해요."
+        description="무슨 일이 있었는지부터 이야기해요. 대화에 따라 감정을 살펴보고 상담에서 전할 내용을 정리해요."
         action={
           visibleMessages.length > 0 ? (
             <ActionLink href="/summary" variant="outline">
@@ -109,7 +99,7 @@ export function ChatPage() {
             <CardHeader className="chat-head">
               <div className="chat-head-row">
                 <div className="chat-head-title">
-                  <CardTitle className="card-title-base">대화 방향을 골라주세요</CardTitle>
+                  <CardTitle className="card-title-base">대화 진행 단계</CardTitle>
                 </div>
                 {visibleMessages.length > 0 && (
                   <div className="chat-record-actions">
@@ -119,31 +109,30 @@ export function ChatPage() {
                         {activeId ? "변경사항 저장" : "대화 저장"}
                       </button>
                     )}
-                    <button type="button" onClick={resetSession} className="chat-reset focus-ring" disabled={historyBusy}>
+                    <button type="button" onClick={resetSession} className="chat-reset focus-ring" disabled={composerDisabled}>
                       새 대화
                     </button>
                   </div>
                 )}
               </div>
-              <div className="chat-focus-grid">
-                {chatFocusOptions.map((option) => {
-                  const Icon = focusIcons[option.id]
+              <ol className="chat-focus-grid" aria-label="대화 진행 단계">
+                {chatFocusOptions.map((option, index) => {
                   return (
-                    <button
+                    <li
                       key={option.id}
-                      type="button"
-                      aria-pressed={focus === option.id}
-                      onClick={() => setFocus(option.id)}
-                      className="chat-focus focus-ring"
+                      aria-current={focus === option.id ? "step" : undefined}
+                      className="chat-focus"
                     >
-                      <Icon aria-hidden="true" />
+                      <span className="chat-focus-number" aria-hidden="true">
+                        {index + 1}
+                      </span>
                       <span className="chat-focus-text">
                         <span className="chat-focus-label">{option.label}</span>
                       </span>
-                    </button>
+                    </li>
                   )
                 })}
-              </div>
+              </ol>
             </CardHeader>
 
             <CardContent className="chat-body">
@@ -205,9 +194,12 @@ export function ChatPage() {
                     className="chat-textarea"
                   />
                   <InputGroupAddon align="block-end" className="chat-composer-bar">
-                    <InputGroupText className="chat-hint">
-                      Enter 전송 · Shift + Enter 줄바꿈
-                    </InputGroupText>
+                    <div className="chat-composer-left">
+                      <ToneMenu value={tone} onChange={setTone} disabled={composerDisabled} />
+                      <InputGroupText className="chat-hint">
+                        Enter 전송 · Shift + Enter 줄바꿈
+                      </InputGroupText>
+                    </div>
                     <div className="chat-actions">
                       {isBusy && (
                         <InputGroupButton
@@ -233,7 +225,9 @@ export function ChatPage() {
               </form>
               {error && (
                 <div role="alert" className="chat-error">
-                  <span>응답을 완료하지 못했어요. 잠시 후 다시 시도해 주세요.</span>
+                  <span>{error.message === "CHAT_PROVIDER_UNAVAILABLE"
+                    ? "지금 챗봇이 답변을 생성하지 못했어요. 잠시 후 다시 시도해 주세요."
+                    : "응답을 완료하지 못했어요. 잠시 후 다시 시도해 주세요."}</span>
                   <button type="button" onClick={clearError}>
                     확인했어요
                   </button>

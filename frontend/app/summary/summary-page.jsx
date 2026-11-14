@@ -6,6 +6,8 @@ import {
   Check,
   ClipboardList,
   Copy,
+  ExternalLink,
+  FileDown,
   Heart,
   MessageCircle,
   RotateCcw,
@@ -24,6 +26,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { clearTemp, MEMO_KEY, putTemp, STATE_KEY } from "@/lib/notion-client"
 import "./summary-page.css"
 function getSections(text) {
   const segments = text
@@ -45,6 +48,7 @@ export function SummaryPage() {
   const [isGenerating, setIsGenerating] = useState(false)
   const [errorMessage, setErrorMessage] = useState("")
   const [copied, setCopied] = useState(false)
+  const [isConnectingNotion, setIsConnectingNotion] = useState(false)
   const transcript = useMemo(
     () =>
       messages
@@ -99,6 +103,45 @@ export function SummaryPage() {
       setCopied(true)
     } catch {
       setErrorMessage("이 브라우저에서는 복사 기능을 사용할 수 없어요.")
+    }
+  }
+  // PDF로 저장: 브라우저 인쇄 창을 열어요. 대상을 "PDF로 저장"으로 고르면 파일이 만들어져요.
+  // 파일 이름이 되는 페이지 제목은 인쇄하는 동안만 바꿔요.
+  function printSummary() {
+    if (!summary) return
+    const previousTitle = document.title
+    const restore = () => {
+      document.title = previousTitle
+      window.removeEventListener("afterprint", restore)
+    }
+    document.title = "상담 전 마음 메모"
+    window.addEventListener("afterprint", restore)
+    window.print()
+  }
+  // Notion으로 보내기: 메모를 이 탭에 잠깐 보관 → Notion 허용 화면으로 이동 → /notion/callback으로 돌아와 저장
+  async function saveToNotion() {
+    if (!summary || isConnectingNotion) return
+    setIsConnectingNotion(true)
+    setErrorMessage("")
+    try {
+      const state = crypto.randomUUID()
+      putTemp(MEMO_KEY, summary)
+      putTemp(STATE_KEY, state)
+      const response = await fetch(`/api/notion/auth-url?state=${encodeURIComponent(state)}`)
+      const result = await response.json()
+      if (!response.ok || typeof result?.url !== "string") {
+        throw new Error(typeof result?.error === "string" ? result.error : "")
+      }
+      window.location.assign(result.url)
+    } catch (error) {
+      setErrorMessage(
+        error instanceof Error && error.message
+          ? error.message
+          : "Notion으로 이동하지 못했어요. 잠시 후 다시 시도해 주세요.",
+      )
+      clearTemp(MEMO_KEY)
+      clearTemp(STATE_KEY)
+      setIsConnectingNotion(false)
     }
   }
   function startNewSession() {
@@ -163,6 +206,19 @@ export function SummaryPage() {
                     type="button"
                     variant="outline"
                     size="sm"
+                    onClick={saveToNotion}
+                    disabled={isConnectingNotion || isGenerating}
+                  >
+                    <ExternalLink data-icon="inline-start" />
+                    {isConnectingNotion ? "Notion으로 이동 중…" : "Notion에 저장"}
+                  </Button>
+                  <Button type="button" variant="outline" size="sm" onClick={printSummary}>
+                    <FileDown data-icon="inline-start" /> PDF로 저장
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
                     onClick={createSummary}
                     disabled={isGenerating}
                   >
@@ -189,7 +245,9 @@ export function SummaryPage() {
               <CardFooter className="summary-foot">
                 <p className="summary-note">
                   이 내용은 AI가 대화를 바탕으로 정리한 참고 메모예요. 사실과 다르거나 불편한 표현은
-                  상담 전에 직접 고쳐주세요.
+                  상담 전에 직접 고쳐주세요. 「Notion에 저장」을 누르면 Notion 로그인·허용 화면으로
+                  이동하고, 메모는 내 Notion에만 만들어져요. 마음결은 메모와 Notion 접근 권한을
+                  서버에 저장하지 않아요.
                 </p>
               </CardFooter>
             </Card>
@@ -220,8 +278,8 @@ export function SummaryPage() {
               </CardContent>
               <CardFooter className="summary-foot">
                 <p className="summary-note">
-                  버튼을 누르면 대화 내용이 AI 모델 제공자에게 전송되어 요약을 생성합니다. 대화
-                  기록은 서비스 데이터베이스에 저장하지 않아요.
+                  버튼을 누르면 대화 내용이 AI 모델 제공자에게 전송되어 요약을 생성합니다. 메모는
+                  별도로 저장되지 않으며, 로그인 후 저장한 대화는 서비스 데이터베이스에 보관됩니다.
                 </p>
               </CardFooter>
             </Card>

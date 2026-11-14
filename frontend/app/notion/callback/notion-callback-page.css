@@ -1,0 +1,29 @@
+@reference "../../globals.css";
+
+.notion-callback {
+  @apply mx-auto max-w-[560px] py-10;
+}
+.notion-callback-body {
+  @apply flex min-h-[300px] flex-col items-center justify-center gap-3 px-6 py-12 text-center;
+}
+.notion-callback-body h1 {
+  @apply type-h2;
+}
+.notion-callback-body p {
+  @apply max-w-md type-body text-ink-secondary;
+}
+.notion-callback-spin {
+  @apply size-8 animate-spin text-muted-foreground;
+}
+.notion-callback-warn {
+  @apply size-8 text-destructive;
+}
+.notion-callback-body p.notion-callback-reason {
+  @apply type-legal text-muted-foreground;
+}
+.notion-callback-link {
+  @apply mt-2 inline-flex items-center gap-1.5 type-ui font-semibold text-foreground underline underline-offset-4;
+}
+.notion-callback-link svg {
+  @apply size-4;
+}
