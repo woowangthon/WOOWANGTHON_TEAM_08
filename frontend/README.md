@@ -23,7 +23,7 @@
 
 | 상담 메모의 `LLM_PROVIDER` | 제공업체 | 필수 키 | 모델 환경변수와 기본값 |
 | --- | --- | --- | --- |
-| `1` 또는 미설정 | Gemini | `GOOGLE_GENERATIVE_AI_API_KEY` | `GEMINI_MODEL=gemini-3.8-flash` |
+| `1` 또는 미설정 | Gemini | `GOOGLE_GENERATIVE_AI_API_KEY` | `GEMINI_MODEL=gemini-3.5-flash-lite` |
 | `2` | Groq | `GROQ_API_KEY` | `GROQ_MODEL=openai/gpt-oss-120b` |
 
 Gemini 키는 [Google AI Studio](https://aistudio.google.com/)에서, Groq 키는 [Groq Console](https://console.groq.com/keys)에서 발급합니다. Groq 기본 모델은 [Groq의 지원 모델 목록](https://console.groq.com/docs/models)에 있는 `openai/gpt-oss-120b`입니다. 다른 모델을 쓰려면 해당 제공업체의 모델 환경변수를 지원되는 모델 ID로 바꾸세요. 두 채팅 말투를 모두 사용하려면 두 제공업체의 키가 필요합니다. 선택한 제공업체의 키가 없으면 해당 요청에 설정 오류를 반환합니다. 상담 메모는 `LLM_PROVIDER`에 `1` 또는 `2`를 사용합니다.
