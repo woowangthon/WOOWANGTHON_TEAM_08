@@ -1,7 +1,7 @@
 import { google } from "@ai-sdk/google"
 import { groq } from "@ai-sdk/groq"
 
-const DEFAULT_GEMINI_MODEL = "gemini-3.8-flash"
+const DEFAULT_GEMINI_MODEL = "gemini-3.5-flash-lite"
 const DEFAULT_GROQ_MODEL = "openai/gpt-oss-120b"
 
 export class LLMConfigurationError extends Error {
@@ -17,8 +17,6 @@ export function getModelConfig(task, provider = process.env.LLM_PROVIDER || "1")
       throw new LLMConfigurationError("GOOGLE_GENERATIVE_AI_API_KEY가 설정되지 않았습니다.")
     }
 
-    // Gemini 3.8 Flash uses its default sampling settings; Google advises
-    // against overriding temperature for this model.
     return {
       model: google(process.env.GEMINI_MODEL?.trim() || DEFAULT_GEMINI_MODEL),
     }
