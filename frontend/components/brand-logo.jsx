@@ -20,7 +20,7 @@ export function BrandMark({ className }) {
       </defs>
       <rect width="64" height="64" rx="15" fill="#2E625B" />
       <g
-        transform="translate(6 6) scale(0.8125)"
+        transform="translate(6 9.66) scale(0.8125)"
         stroke="#E8F1EC"
         strokeWidth="4.5"
         strokeLinecap="round"

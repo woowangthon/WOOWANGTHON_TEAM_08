@@ -48,8 +48,12 @@
 .chat-focus[aria-current="step"] {
   @apply border-[1.5px] border-brand bg-brand-soft text-foreground;
 }
-.chat-focus > svg {
-  @apply mt-0.5 size-4 shrink-0;
+/* 단계 번호: 라벨 앞에 글자로만 써요. 진행 중인 단계만 색을 진하게 해요. */
+.chat-focus-number {
+  @apply w-4 shrink-0 text-center type-ui font-semibold tabular-nums text-ink-secondary;
+}
+.chat-focus[aria-current="step"] .chat-focus-number {
+  @apply text-brand;
 }
 .chat-focus-text {
   @apply min-w-0;
@@ -132,12 +136,6 @@
 .chat-form {
   @apply w-full;
 }
-.chat-tone {
-  @apply mb-2 inline-flex max-w-full flex-wrap items-center gap-x-2 gap-y-1.5 type-ui-sm text-muted-foreground;
-}
-.chat-tone-select {
-  @apply h-11 max-w-full rounded-ds-sm border border-input bg-surface-tint px-3 type-ui text-foreground disabled:opacity-50;
-}
 .chat-composer {
   @apply h-auto min-h-28 flex-col items-stretch rounded-ds-sm bg-card p-1 shadow-[var(--shadow-warm)];
 }
@@ -153,8 +151,12 @@
 .chat-composer-bar {
   @apply w-full justify-between border-t border-border/80 px-2 py-2;
 }
+/* 말투 선택(왼쪽) + 키보드 안내. 좁은 화면에서는 키보드 안내를 숨겨요. */
+.chat-composer-left {
+  @apply flex min-w-0 items-center gap-3;
+}
 .chat-hint {
-  @apply type-legal text-muted-foreground;
+  @apply hidden type-legal text-muted-foreground sm:flex;
   line-height: 1.5;
 }
 .chat-actions {
