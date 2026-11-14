@@ -1,0 +1,62 @@
+@reference "../app/globals.css";
+
+/* 말투 선택: 테두리·그림자 없이 배경 톤 차이로만 구분해요. */
+
+/* ── 버튼(입력창 아래줄) ───────────── */
+.tone-trigger {
+  @apply inline-flex min-h-9 shrink-0 items-center gap-1.5 rounded-ds-md bg-primary-tint px-3 py-1.5 type-ui transition-colors;
+}
+.tone-trigger:hover,
+.tone-trigger[aria-expanded="true"] {
+  background-color: color-mix(in oklch, var(--primary-tint), var(--foreground) 6%);
+}
+.tone-trigger:disabled {
+  @apply pointer-events-none opacity-50;
+}
+.tone-trigger-name {
+  @apply font-normal text-ink-secondary;
+}
+.tone-trigger-value {
+  @apply font-semibold text-foreground;
+}
+.tone-trigger svg {
+  @apply size-3.5 text-muted-foreground transition-transform;
+}
+.tone-trigger[aria-expanded="true"] svg {
+  @apply rotate-180;
+}
+
+/* ── 열리는 목록 ───────────────────── */
+.tone-positioner {
+  @apply z-50;
+}
+.tone-popup {
+  @apply min-w-56 rounded-ds-lg bg-brand-soft p-1.5 outline-none;
+}
+.tone-option {
+  @apply flex cursor-default items-center justify-between gap-4 rounded-ds-md px-3 py-2.5 outline-none select-none;
+}
+.tone-option[data-highlighted] {
+  @apply bg-card/70;
+}
+.tone-option[aria-checked="true"] {
+  @apply bg-card;
+}
+.tone-option-text {
+  @apply grid gap-1;
+}
+.tone-option-label {
+  @apply type-ui text-foreground;
+}
+.tone-option[aria-checked="true"] .tone-option-label {
+  @apply font-semibold;
+}
+.tone-option-desc {
+  @apply type-legal text-ink-secondary;
+}
+.tone-option-check {
+  @apply grid size-5 shrink-0 place-items-center text-brand;
+}
+.tone-option-check svg {
+  @apply size-4;
+}

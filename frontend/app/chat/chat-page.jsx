@@ -1,19 +1,13 @@
 "use client"
 import { useState } from "react"
 import Link from "next/link"
-import {
-  ArrowRight,
-  ClipboardList,
-  Heart,
-  MessageCircle,
-  Search,
-  Send,
-} from "lucide-react"
+import { ArrowRight, MessageCircle, Send } from "lucide-react"
 import { ActionLink } from "@/components/action-link"
 import { BrandMark } from "@/components/brand-logo"
 import { ChatHistory } from "@/components/chat-history"
 import { chatFocusOptions, useChatSession } from "@/components/chat-session-provider"
 import { PageHeading } from "@/components/page-heading"
+import { ToneMenu } from "@/components/tone-menu"
 import {
   Card,
   CardContent,
@@ -30,11 +24,6 @@ import {
   InputGroupTextarea,
 } from "@/components/ui/input-group"
 import "./chat-page.css"
-const focusIcons = {
-  situation: Search,
-  feelings: Heart,
-  consultation: ClipboardList,
-}
 function MessageBubble({ role, text }) {
   const isAssistant = role === "assistant"
   return (
@@ -127,15 +116,16 @@ export function ChatPage() {
                 )}
               </div>
               <ol className="chat-focus-grid" aria-label="대화 진행 단계">
-                {chatFocusOptions.map((option) => {
-                  const Icon = focusIcons[option.id]
+                {chatFocusOptions.map((option, index) => {
                   return (
                     <li
                       key={option.id}
                       aria-current={focus === option.id ? "step" : undefined}
                       className="chat-focus"
                     >
-                      <Icon aria-hidden="true" />
+                      <span className="chat-focus-number" aria-hidden="true">
+                        {index + 1}
+                      </span>
                       <span className="chat-focus-text">
                         <span className="chat-focus-label">{option.label}</span>
                       </span>
@@ -191,18 +181,6 @@ export function ChatPage() {
 
             <CardFooter className="chat-foot">
               <form onSubmit={submitMessage} className="chat-form">
-                <label className="chat-tone">
-                  <span>대화 말투</span>
-                  <select
-                    className="chat-tone-select focus-ring"
-                    value={tone}
-                    onChange={(event) => setTone(event.target.value)}
-                    disabled={composerDisabled}
-                  >
-                    <option value="warm">따뜻하게 들어주기</option>
-                    <option value="structured">차분하게 정리하기</option>
-                  </select>
-                </label>
                 <InputGroup className="chat-composer">
                   <InputGroupTextarea
                     aria-label="마음결에게 보낼 메시지"
@@ -216,9 +194,12 @@ export function ChatPage() {
                     className="chat-textarea"
                   />
                   <InputGroupAddon align="block-end" className="chat-composer-bar">
-                    <InputGroupText className="chat-hint">
-                      Enter 전송 · Shift + Enter 줄바꿈
-                    </InputGroupText>
+                    <div className="chat-composer-left">
+                      <ToneMenu value={tone} onChange={setTone} disabled={composerDisabled} />
+                      <InputGroupText className="chat-hint">
+                        Enter 전송 · Shift + Enter 줄바꿈
+                      </InputGroupText>
+                    </div>
                     <div className="chat-actions">
                       {isBusy && (
                         <InputGroupButton
