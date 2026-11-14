@@ -38,7 +38,7 @@
 | 인증·데이터베이스 | Supabase |
 | 기관 정보 | 보건복지부·국립정신건강센터 정신건강 관련 기관 정보 |
 | 지원제도 정보 | 공공데이터포털 공공서비스(혜택) 정보 |
-| AI 모델 | `gemini-3.8-flash`, `openai/gpt-oss-120b` |
+| AI 모델 | `gemini-3.5-flash-lite`, `openai/gpt-oss-120b` |
 
 ## 서비스 안내
 
