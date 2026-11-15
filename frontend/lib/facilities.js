@@ -86,10 +86,17 @@ function parseRegion(address) {
 }
 
 // ── 한 줄(row) → 화면에서 쓰는 모양 ──────────────────
+// 홈페이지 칸에 "없음", "-", 이메일, 주소 여러 개처럼 주소가 아닌 값이 있어도 가짜 링크가 만들어지지 않게 해요.
+// 첫 번째 값만 쓰고, 도메인에 점(.)이 없으면 홈페이지 없음으로 처리해요.
 function cleanHomepage(value) {
-  const text = (value ?? "").trim()
-  if (!text) return ""
-  return /^https?:\/\//i.test(text) ? text : `https://${text}`
+  const text = (value ?? "").trim().split(/[\s,;]+/)[0] ?? ""
+  if (!text || text.includes("@")) return ""
+  const candidate = /^https?:\/\//i.test(text) ? text : `https://${text}`
+  try {
+    return new URL(candidate).hostname.includes(".") ? candidate : ""
+  } catch {
+    return ""
+  }
 }
 
 function toNumber(value) {
@@ -228,6 +235,11 @@ function searchAddress(address) {
   return address.replace(/\s+/g, " ").replace(/\s*-\s*$/, "").trim()
 }
 export function naverMapLink(facility) {
-  const query = `${searchName(facility.name)} ${searchAddress(facility.address)}`
+  // 주소 전체는 같은 건물에 기관이 여럿이면 헷갈리고, 기관명만은 같은 이름이 여러 곳이라 헷갈려요.
+  // 그래서 "시·도 + 시·군·구 + 기관명"으로 검색해요. (예: 서울 중구 ○○센터)
+  // 기관명이 비어 있으면 주소로 검색해요.
+  const name = searchName(facility.name ?? "")
+  const region = [facility.province, facility.district].filter(Boolean).join(" ")
+  const query = name ? `${region} ${name}`.trim() : searchAddress(facility.address ?? "")
   return `https://map.naver.com/p/search/${encodeURIComponent(query)}`
 }
